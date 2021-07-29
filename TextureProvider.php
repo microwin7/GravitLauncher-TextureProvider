@@ -6,7 +6,7 @@
 #
 $msg = [];
 header("Content-Type: text/plain; charset=UTF-8");
-$login = $_GET['login'];
+$login = isset($_GET['login']) ? $_GET['login'] : null;
 
 class cfg
 {
