@@ -76,6 +76,7 @@ function start()
 {
     $login = isset($_GET['login']) ? $_GET['login'] : null;
     regex_valid($login) ?: response();
+    $msg = [];
     $skin = Check::skin($login);
     $cloak = Check::cloak($login);
     if (!is_null($skin)) $msg['skin'] = $skin;
