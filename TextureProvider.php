@@ -78,8 +78,8 @@ function start()
     regex_valid($login) ?: response();
     $msg = [];
     $skin = Check::skin($login);
-    $cloak = Check::cloak($login);
     if (!is_null($skin)) $msg['skin'] = $skin;
+    $cloak = Check::cloak($login);
     if (!is_null($cloak)) $msg['cloak'] = $cloak;
     response($msg);
 }
