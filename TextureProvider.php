@@ -23,10 +23,6 @@ class Constants
     {
         return str_replace('%login%', $login, self::CLOAK_URL);
     }
-    public static function getBase64Encode_MD5($data)
-    {
-        return base64_encode(md5($data));
-    }
 }
 class Check
 {
@@ -36,7 +32,7 @@ class Check
         if ($loadskin) {
             $msg = array(
                 'url' => Constants::getSkinURL($login),
-                'digest' => Constants::getBase64Encode_MD5(file_get_contents($loadskin))
+                'digest' => base64_encode(md5(file_get_contents($loadskin)))
             );
             $size = getimagesize($loadskin);
             $fraction = $size[0] / 8;
@@ -56,7 +52,7 @@ class Check
         if ($loadskin) {
             $msg = array(
                 'url' => Constants::getCloakURL($login),
-                'digest' => Constants::getBase64Encode_MD5(file_get_contents($loadskin))
+                'digest' => base64_encode(md5(file_get_contents($loadskin)))
             );
             return $msg;
         }
