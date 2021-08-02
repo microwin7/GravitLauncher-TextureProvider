@@ -4,74 +4,87 @@
 #
 # https://github.com/microwin7/GravitLauncher-TextureProvider
 #
-$msg = [];
 header("Content-Type: text/plain; charset=UTF-8");
 $login = isset($_GET['login']) ? $_GET['login'] : null;
 
-class cfg
+class Constants
 {
-    static $settings = array(
-        "skin_path" => "./minecraft-auth/skins/", // Сюда вписать путь до skins/
-        "cloak_path" => "./minecraft-auth/cloaks/", // Сюда вписать путь до cloaks/
-        "skinURL" => "http://example.com/skins/%login%.png",
-        "cloakURL" => "http://example.com/cloaks/%login%.png",
-    );
+    const SKIN_PATH = "./minecraft-auth/skins/"; // Сюда вписать путь до skins/
+    const CLOAK_PATH = "./minecraft-auth/cloaks/"; // Сюда вписать путь до cloaks/
+    const SKIN_URL = "http://127.0.0.1/minecraft-auth/skins/%login%.png";
+    const CLOAK_URL = "http://127.0.0.1/minecraft-auth/cloaks/%login%.png";
+    const REGEX_USERNAME = "\w{1,16}$";
+    const REGEX_UUID = "[a-f0-9]{8}\-[a-f0-9]{4}\-4[a-f0-9]{3}\-(8|9|a|b)[a-f0-9]{3}\-[a-f0-9]{12}";
+
+    public static function getSkinURL($login)
+    {
+        return str_replace('%login%', $login, self::SKIN_URL);
+    }
+    public static function getCloakURL($login)
+    {
+        return str_replace('%login%', $login, self::CLOAK_URL);
+    }
+    public static function getBase64Encode_MD5($data)
+    {
+        return base64_encode(md5($data));
+    }
+}
+class Msg
+{
+    private $msg;
+    public function add($key, $data)
+    {
+        if (!is_null($data)) $this->msg[$key] = $data;
+    }
+    public function exit()
+    {
+        die(json_encode((object) $this->msg, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+    }
 }
 if (strnatcmp(phpversion(), '5.6') >= 0) {
-    rgxp_valid($login);
-    check_skin($login);
-    check_cloak($login);
-}
-response(true);
+    $msg = new Msg();
+    if(!regex_valid($login)) $msg->exit();
+    $msg->add('skin', check_skin($login));
+    $msg->add('cloak', check_cloak($login));
+    $msg->exit();
+} else die("{}");
 function check_skin($login)
 {
-    global $msg;
-    $loadskin = ci_find_file(cfg::$settings['skin_path'] . $login . '.png');  // Поиск пути
+    $loadskin = ci_find_file(Constants::SKIN_PATH . $login . '.png');
     if ($loadskin) {
-        $msg['skin'] = array(
-            'url' => str_replace('%login%', $login, cfg::$settings['skinURL']),
-            'digest' => base64_encode(md5(file_get_contents($loadskin)))
+        $msg = array(
+            'url' => Constants::getSkinURL($login),
+            'digest' => Constants::getBase64Encode_MD5(file_get_contents($loadskin))
         );
-        $size = getimagesize($loadskin); // взятие оригинальных размеров картинки в пикселях
+        $size = getimagesize($loadskin);
         $fraction = $size[0] / 8;
-        $image = imagecreatefrompng($loadskin); // создание png из файла для дальнейшего взаимодействия с ним
+        $image = imagecreatefrompng($loadskin);
         $x1 = $fraction * 6.75;
         $y1 = $fraction * 2.5;
         $rgba = imagecolorat($image, $x1, $y1);
         if (($rgba & 0x7F000000) >> 24) {
-            $msg['skin']['metadata'] = array('model' => 'slim');
+            $msg['metadata'] = array('model' => 'slim');
         }
     }
+    return $msg;
 }
 function check_cloak($login)
 {
-    global $msg;
-    $loadskin = ci_find_file(cfg::$settings['cloak_path'] . $login . '.png');  // Поиск пути
+    $loadskin = ci_find_file(Constants::CLOAK_PATH . $login . '.png');
     if ($loadskin) {
-        $msg['cloak'] = array(
-            'url' => str_replace('%login%', $login, cfg::$settings['cloakURL']),
-            'digest' => base64_encode(md5(file_get_contents($loadskin)))
+        $msg = array(
+            'url' => Constants::getCloakURL($login),
+            'digest' => Constants::getBase64Encode_MD5(file_get_contents($loadskin))
         );
     }
-    response(true);
+    return $msg;
 }
-function rgxp_valid($var)
+function regex_valid($var)
 {
-    $pattern_username = '\w{1,16}$';
-    $pattern_uuid = "[a-f0-9]{8}\-[a-f0-9]{4}\-4[a-f0-9]{3}\-(8|9|a|b)[a-f0-9]{3}\-[a-f0-9]{12}";
-    if (
-        preg_match("/^" . $pattern_username . "/", $var, $varR) ||
-        preg_match("/" . $pattern_uuid . "/", $var, $varR)
-    ) {
+    if (!is_null($var) && (preg_match("/^" . Constants::REGEX_USERNAME . "/", $var, $varR) ||
+        preg_match("/" . Constants::REGEX_UUID . "/", $var, $varR)))
         return true;
-    } else {
-        response(true);
-    }
-}
-function response($exit = false)
-{
-    global $msg;
-    if ($exit) die(json_encode((object) $msg, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+    else return false;
 }
 function ci_find_file($filename)
 {
@@ -87,3 +100,4 @@ function ci_find_file($filename)
     }
     return false;
 }
+
