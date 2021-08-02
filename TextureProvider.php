@@ -4,7 +4,7 @@
 #
 # https://github.com/microwin7/GravitLauncher-TextureProvider
 #
-header("Content-Type: text/plain; charset=UTF-8");
+header("Content-Type: application/json; charset=UTF-8");
 
 start();
 class Constants
@@ -44,7 +44,7 @@ class Check
 {
     public static function skin($login)
     {
-        $loadskin = ci_find_file(Constants::SKIN_PATH . $login . '.png');
+        $loadskin = self::ci_find_file(Constants::SKIN_PATH . $login . '.png');
         if ($loadskin) {
             $msg = array(
                 'url' => Constants::getSkinURL($login),
@@ -92,10 +92,12 @@ function start()
 {
     $login = isset($_GET['login']) ? $_GET['login'] : null;
     regex_valid($login) ?: response();
-    $msg = new Msg();
-    $msg->put('skin', Check::skin($login));
-    $msg->put('cloak', Check::cloak($login));
-    response($msg->get());
+    $msg = [];
+    $skin = Check::skin($login);
+    $cloak = Check::cloak($login);
+    if (!is_null($skin)) $msg['skin'] = $skin;
+    if (!is_null($cloak)) $msg['cloak'] = $cloak;
+    response($msg);
 }
 function response($msg = null)
 {
@@ -108,4 +110,3 @@ function regex_valid($var)
         preg_match("/" . Constants::REGEX_UUID . "/", $var, $varR)))
         return true;
 }
-
