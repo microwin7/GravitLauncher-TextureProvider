@@ -28,18 +28,6 @@ class Constants
         return base64_encode(md5($data));
     }
 }
-class Msg
-{
-    private $msg;
-    public function put($key, $data)
-    {
-        if (!is_null($data)) $this->msg[$key] = $data;
-    }
-    public function get()
-    {
-        return $this->msg;
-    }
-}
 class Check
 {
     public static function skin($login)
