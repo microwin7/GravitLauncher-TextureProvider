@@ -100,4 +100,3 @@ function ci_find_file($filename)
     }
     return false;
 }
-
