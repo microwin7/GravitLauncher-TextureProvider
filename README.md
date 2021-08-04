@@ -28,6 +28,16 @@
 
 <h1 align="center">
 <br>
+Установка
+</h1>
+
+- Перейдите в каталог сайта
+```bash
+curl -O https://raw.githubusercontent.com/microwin7/GravitLauncher-TextureProvider/main/TextureProvider.php
+```
+
+<h1 align="center">
+<br>
 НАСТРОЙКА
 </h1>
 
