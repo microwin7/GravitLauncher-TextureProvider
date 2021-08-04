@@ -54,7 +54,7 @@
 - **На имени пользователя**
 ```json
 "textureProvider":{
-      "url":"https://example.com/textureProvider.php?login=%username%",
+      "url":"https://example.com/TextureProvider.php?login=%username%",
       "type":"json"
    }
 ```
@@ -62,7 +62,7 @@
 - **На UUID**
 ```json
 "textureProvider":{
-      "url":"https://example.com/textureProvider.php?login=%uuid%",
+      "url":"https://example.com/TextureProvider.php?login=%uuid%",
       "type":"json"
    }
 ```
