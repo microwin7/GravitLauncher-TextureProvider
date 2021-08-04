@@ -14,7 +14,7 @@
 ✖ Выдача плащей из папки. (Не реализовано)
 
 <p align="center">
-    <img src="https://i.imgur.com/q0nkKNj.png" alt="demo" width="642" height="768">
+    <img src="https://i.imgur.com/q0nkKNj.png" alt="demo" width="642">
 </p>
 
 <h1 align="center">
