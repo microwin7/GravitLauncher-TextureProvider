@@ -20,7 +20,7 @@
 
 - PHP 5.6+
 - GravitLauncher 5.2.0+ [#Правки](https://github.com/GravitLauncher/Launcher/compare/fecc14010d30...5d0ccdbde3b9)
-- AuthLib под версию 5.2.0 [СКАЧАТЬ](https://mirror.gravit.pro/compat/authlib/2/LauncherAuthlib2-5.2.0.jar)
+- AuthLib под версию 5.2.0 [[СКАЧАТЬ]](https://mirror.gravit.pro/compat/authlib/2/LauncherAuthlib2-5.2.0.jar)
 - Расширение GD `php-gd`. Пример для PHP 7.4: `sudo apt-get install php7.4-gd`
 
 <h1 align="center">
