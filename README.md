@@ -3,8 +3,6 @@
 ![PHP 5.6.0](https://img.shields.io/badge/PHP-5.6.0-blue)
 ![Gravit Launcher](https://img.shields.io/badge/Gravit%20Launcher-5.2.0-brightgreen)
 
-## Выдача данных для скинов и плащей. GravitLauncher 5.2.0+
-
 ✔ Выдача данных для default (classic) и обнаружение slim скинов.
 
 ✔ Работает с любыми общепринятыми размерами скинов и плащей
