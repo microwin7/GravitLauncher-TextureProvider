@@ -111,7 +111,7 @@ curl -O https://raw.githubusercontent.com/microwin7/GravitLauncher-TextureProvid
 ```json
 {
     "skin": {
-        "url": "http://127.0.0.1/minecraft-auth/skins/default.png",
+        "url": "https://example.com/minecraft-auth/skins/default.png",
         "digest": "YjQ2ZTM4ODljNzBlMGJiOWUyYmExYzdkNGM2ZTI5Zjc="
     }
 }
