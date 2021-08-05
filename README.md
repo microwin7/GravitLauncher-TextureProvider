@@ -9,9 +9,7 @@
 
 ✔ Работает с любыми общепринятыми размерами скинов и плащей
 
-✖ Выдача скинов из папки. (Не реализовано)
-
-✖ Выдача плащей из папки. (Не реализовано)
+✔ Выдача скинов и плащей этим скриптом при желании
 
 <p align="center">
     <img src="https://i.imgur.com/q0nkKNj.png" alt="demo" width="642">
@@ -49,12 +47,22 @@ curl -O https://raw.githubusercontent.com/microwin7/GravitLauncher-TextureProvid
 `../ - одна директория вверх`
 `minecraft-auth папка указана для примера`
 
-- **Настройка отдаваемых ссылок**
+- **Настройка отдаваемых ссылок (Не через скрипт)**
 ```php
     const SKIN_URL = "https://example.com/minecraft-auth/skins/%login%.png";
     const CLOAK_URL = "https://example.com/minecraft-auth/cloaks/%login%.png";
 ```
 Можете спокойно перенести ссылки из уже настроеных в конфиге лаунчсервера, заменив только заполнитель на %login%
+
+- **Настройка отдаваемых ссылок (Через скрипт)**
+```php
+    const SKIN_URL = "https://example.com/TextureProvider.php?login=%login%";
+    const CLOAK_URL = "https://example.com/TextureProvider.php?login=%login%";
+```
+- Работает только если ссылки выше указывают на сам скрипт и имеют окончание `?login=%login%`
+```php
+    const GIVE_DEFAULT = true;
+```
 
 <h1 align="center">
 <br>
