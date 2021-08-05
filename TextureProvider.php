@@ -51,7 +51,7 @@ class Check
         }
         return $msg;
     }
-    public static function slim($data)
+    private static function slim($data)
     {
         $image = imagecreatefromstring($data);
         $fraction = imagesx($image) / 8;
