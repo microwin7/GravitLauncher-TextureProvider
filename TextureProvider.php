@@ -57,8 +57,8 @@ class Check
         $fraction = imagesx($image) / 8;
         $x = $fraction * 6.75;
         $y = $fraction * 2.5;
-        $rgba = imagecolorat($image, $x, $y);
-        if (($rgba & 0x7F000000) >> 24)
+        $rgba = imagecolorsforindex($image, imagecolorat($image, $x, $y));
+        if ($rgba["alpha"] === 127)
             return true;
         else return false;
     }
