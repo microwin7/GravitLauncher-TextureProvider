@@ -28,12 +28,12 @@ class Constants
     public static function getSkin($login)
     {
         $path = Check::ci_find_file(self::SKIN_PATH . $login . '.png');
-        return $path ? file_get_contents($path) : (self::GIVE_DEFAULT ? base64_decode(self::SKIN_DEFAULT) : null);
+        return $path ? file_get_contents($path) : (self::GIVE_DEFAULT && contains(self::SKIN_URL, $_SERVER['PHP_SELF']) ? base64_decode(self::SKIN_DEFAULT) : null);
     }
     public static function getCloak($login)
     {
         $path = Check::ci_find_file(self::CLOAK_PATH . $login . '.png');
-        return $path ? file_get_contents($path) : (self::GIVE_DEFAULT ? base64_decode(self::CLOAK_DEFAULT) : null);
+        return $path ? file_get_contents($path) : (self::GIVE_DEFAULT && contains(self::CLOAK_URL, $_SERVER['PHP_SELF']) ? base64_decode(self::CLOAK_DEFAULT) : null);
     }
 }
 class Check
