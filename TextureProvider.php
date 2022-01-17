@@ -36,19 +36,118 @@ class Constants
         $path = Check::ci_find_file(self::CLOAK_PATH . $login . '.png');
         return $path ? file_get_contents($path) : (self::GIVE_DEFAULT && contains(self::CLOAK_URL, $_SERVER['PHP_SELF']) ? base64_decode(self::CLOAK_DEFAULT) : null);
     }
+    public static function getDataUrl($url)
+    {
+        $data = file_get_contents($url, false, stream_context_create(['http' => ['ignore_errors' => true]]));
+        $headers = self::parseHeaders($http_response_header);
+        ($headers['reponse_code'] == 200) ?: response();
+        return $data;
+    }
+    private static function parseHeaders($headers)
+    {
+        $head = array();
+        foreach ($headers as $key => $value) {
+            $t = explode(':', $value, 2);
+            if (isset($t[1]))
+                $head[trim($t[0])] = trim($t[1]);
+            else {
+                $head[] = $value;
+                if (preg_match("#HTTP/[0-9\.]+\s+([0-9]+)#", $value, $out))
+                    $head['reponse_code'] = intval($out[1]);
+            }
+        }
+        return $head;
+    }
+}
+class Mojang
+{
+    public static $uuid = null;
+    public static $textures = null;
+    public static $mojangSkinUrl = null;
+    public static $mojangSkinSlim = null;
+    public static $mojangSkin = null;
+    public static $mojangCloakUrl = null;
+    public static $mojangCloak = null;
+
+    function __construct()
+    {
+        self::getMojangUUID();
+        self::getMojangTextures();
+        self::mojangSkinUrl();
+        self::mojangSkin();
+        self::mojangCloakurl();
+        self::mojangCloak();
+    }
+
+    public static function getMojangUUID(): string
+    {
+        if (self::$uuid == null) {
+            $login = $_GET['login'];
+            $data = Constants::getDataUrl('https://api.mojang.com/users/profiles/minecraft/' . $login);
+            return self::$uuid = json_decode($data, true)['id'];
+        } else return self::$uuid;
+    }
+    public static function getMojangTextures(): array
+    {
+        if (self::$textures == null) {
+            $data = Constants::getDataUrl('https://sessionserver.mojang.com/session/minecraft/profile/' . self::$uuid);
+            return self::$textures = json_decode(base64_decode(json_decode($data, true)['properties'][0]['value']), true)['textures'];
+        } else return self::$textures;
+    }
+    public static function mojangSkinUrl(): string
+    {
+        if (self::$mojangSkinUrl == null) {
+            return self::$mojangSkinUrl = self::getMojangTextures()['SKIN']['url'];
+        } else return self::$mojangSkinUrl;
+    }
+    public static function mojangSkin(): string
+    {
+        if (self::$mojangSkin == null) {
+            return self::$mojangSkin = Constants::getDataUrl(self::$mojangSkinUrl);
+        } else return self::$mojangSkin;
+    }
+    public static function mojangSkinSlim(): bool
+    {
+        if (self::$mojangSkinSlim == null) {
+            return self::$mojangSkinSlim = isset(self::getMojangTextures()['SKIN']['metadata']['model']) ? true : false;
+        } else return self::$mojangSkinSlim;
+    }
+    public static function mojangCloakUrl()
+    {
+        if (self::$mojangCloakUrl == null) {
+            return self::$mojangCloakUrl = isset(self::getMojangTextures()['CAPE']['url']) ? self::getMojangTextures()['CAPE']['url'] : false;
+        } else return self::$mojangCloakUrl;
+    }
+    public static function mojangCloak()
+    {
+        if (self::$mojangCloakUrl == null) return false;
+        if (self::$mojangCloak == null) {
+            return self::$mojangCloak = Constants::getDataUrl(self::$mojangCloakUrl);
+        } else return self::$mojangCloak;
+    }
 }
 class Check
 {
-    public static function skin($login)
+    public static function skin($login, $method = 'normal', $skin = null, $skinUrl = null, $skinSlim = null)
     {
         $msg = [];
-        $data = Constants::getSkin($login);
-        if (isset($data)) {
-            $msg = array(
-                'url' => Constants::getSkinURL($login),
-                'digest' => base64_encode(md5($data))
-            );
-            if (self::slim($data)) $msg['metadata'] = array('model' => 'slim');
+        if ($method == 'normal') {
+            $data =  Constants::getSkin($login);
+            if (isset($data)) {
+                $msg = array(
+                    'url' =>  Constants::getSkinURL($login),
+                    'digest' => base64_encode(md5($data))
+                );
+                if (self::slim($data)) $msg['metadata'] = array('model' => 'slim');
+            }
+        } else {
+            if (!empty($skin)) {
+                $msg = array(
+                    'url' =>  $skinUrl,
+                    'digest' => base64_encode(md5($skin))
+                );
+                if ($skinSlim) $msg['metadata'] = array('model' => 'slim');
+            }
         }
         return $msg;
     }
@@ -63,15 +162,24 @@ class Check
             return true;
         else return false;
     }
-    public static function cloak($login)
+    public static function cloak($login, $method = 'normal', $cloak = null, $cloakUrl = null)
     {
         $msg = [];
-        $data = Constants::getCloak($login);
-        if (isset($data)) {
-            $msg = array(
-                'url' => Constants::getCloakURL($login),
-                'digest' => base64_encode(md5($data))
-            );
+        if ($method == 'normal') {
+            $data = isset($data) ? $data :  Constants::getCloak($login);
+            if (isset($data)) {
+                $msg = array(
+                    'url' => Constants::getCloakURL($login),
+                    'digest' => base64_encode(md5($data))
+                );
+            }
+        } else {
+            if (!empty($cloak)) {
+                $msg = array(
+                    'url' => $cloakUrl,
+                    'digest' => base64_encode(md5($cloak))
+                );
+            }
         }
         return $msg;
     }
@@ -92,16 +200,31 @@ class Check
 }
 function start()
 {
+    ini_set('error_reporting', E_ALL);
+    ini_set('display_errors', 1);
+    ini_set('display_startup_errors', 1);
     $login = isset($_GET['login']) ? $_GET['login'] : null;
     $type = isset($_GET['type']) ? $_GET['type'] : null;
-    regex_valid($login) ?: response();
-    if (!empty($type)) getTexture($login, $type);
-    $msg = [];
-    $skin = Check::skin($login);
-    if (!empty($skin)) $msg['skin'] = $skin;
-    $cloak = Check::cloak($login);
-    if (!empty($cloak)) $msg['cloak'] = $cloak;
-    response($msg);
+    $method = isset($_GET['method']) ? $_GET['method'] : null; // normal, mojang, hybrid (последнее ещё будет)
+    $method = getMethod($method);
+    ($method == 'normal' ? regex_valid_username($login) || regex_valid_uuid($login) : regex_valid_username($login)) ?: response();
+    if ($method == 'mojang') {
+        $mojang = new Mojang();
+        $msg = [];
+        $skin = Check::skin($login, $method, $mojang::mojangSkin(), $mojang::mojangSkinUrl(), $mojang::mojangSkinSlim());
+        if (!empty($skin)) $msg['skin'] = $skin;
+        $cloak = Check::cloak($login, $method, $mojang::mojangCloak(), $mojang::mojangCloakUrl());
+        if (!empty($cloak)) $msg['cloak'] = $cloak;
+        response($msg);
+    } else {
+        if (!empty($type)) getTexture($login, $type);
+        $msg = [];
+        $skin = Check::skin($login);
+        if (!empty($skin)) $msg['skin'] = $skin;
+        $cloak = Check::cloak($login);
+        if (!empty($cloak)) $msg['cloak'] = $cloak;
+        response($msg);
+    }
 }
 function getTexture($login, $type)
 {
@@ -113,19 +236,40 @@ function getTexture($login, $type)
             die(Constants::getSkin($login));
     }
 }
+function getMethod($method)
+{
+    switch ($method) {
+        case 'mojang' || 'hybrid':
+            return $method;
+        default:
+            return 'normal';
+    }
+}
 function response($msg = null)
 {
     header("Content-Type: application/json; charset=UTF-8");
     die(json_encode((object) $msg, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
 }
-function regex_valid($var)
+function regex_valid_username($var)
 {
-    if (!is_null($var) && (preg_match("/^" . Constants::REGEX_USERNAME . "/", $var, $varR) ||
-        preg_match("/" . Constants::REGEX_UUIDv1 . "/", $var, $varR) ||
+    if (!is_null($var) && (preg_match("/^" . Constants::REGEX_USERNAME . "/", $var, $varR)))
+        return true;
+}
+function regex_valid_uuid($var)
+{
+    if (!is_null($var) && (preg_match("/" . Constants::REGEX_UUIDv1 . "/", $var, $varR) ||
         preg_match("/" . Constants::REGEX_UUIDv4 . "/", $var, $varR)))
         return true;
 }
 function contains($haystack, $needle)
 {
     return strpos($haystack, $needle) !== false;
+}
+function exists(...$var)
+{
+    $i = true;
+    foreach ($var as $v) {
+        $i = (!empty($v) && isset($v) && $i) ? true : false;
+    }
+    return $i;
 }
