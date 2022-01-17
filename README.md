@@ -84,6 +84,17 @@ curl -O https://raw.githubusercontent.com/microwin7/GravitLauncher-TextureProvid
    }
 ```
 
+- **Метод получения скинов и плащей через Mojang**
+```json
+"textureProvider":{
+      "url":"https://example.com/TextureProvider.php?login=%username%&method=mojang",
+      "type":"json"
+   }
+```
+`работает только на %username%`
+`Для этого метода не требуется php-gd, информация о slim получается через Mojang API`
+`Без указания метода, будет обычный режим работать`
+
 <h1 align="center">
 <br>
 Примеры ответа в браузере
