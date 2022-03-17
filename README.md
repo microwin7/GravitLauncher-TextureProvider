@@ -41,7 +41,7 @@ curl -O https://raw.githubusercontent.com/microwin7/GravitLauncher-TextureProvid
 - **Настройка пути к скинам и плащам**
 ```php
     const SKIN_PATH = "./minecraft-auth/skins/"; // Сюда вписать путь до skins/
-    const CLOAK_PATH = "./minecraft-auth/cloaks/"; // Сюда вписать путь до cloaks/
+    const CAPE_PATH = "./minecraft-auth/capes/"; // Сюда вписать путь до capes/
 ```
 `../ - одна директория вверх`
 `minecraft-auth папка указана для примера`
@@ -49,14 +49,14 @@ curl -O https://raw.githubusercontent.com/microwin7/GravitLauncher-TextureProvid
 - **Настройка отдаваемых ссылок (Не через скрипт)**
 ```php
     const SKIN_URL = "https://example.com/minecraft-auth/skins/%login%.png";
-    const CLOAK_URL = "https://example.com/minecraft-auth/cloaks/%login%.png";
+    const CAPE_URL = "https://example.com/minecraft-auth/capes/%login%.png";
 ```
 Можете спокойно перенести ссылки из уже настроеных в конфиге лаунчсервера, заменив только заполнитель на %login%
 
 - **Настройка отдаваемых ссылок (Через скрипт)**
 ```php
     const SKIN_URL = "https://example.com/TextureProvider.php?login=%login%";
-    const CLOAK_URL = "https://example.com/TextureProvider.php?login=%login%";
+    const CAPE_URL = "https://example.com/TextureProvider.php?login=%login%";
 ```
 - Работает только если ссылки выше указывают на сам скрипт и имеют окончание `?login=%login%`
 ```php
@@ -92,15 +92,15 @@ curl -O https://raw.githubusercontent.com/microwin7/GravitLauncher-TextureProvid
 - **При наличии скина slim и плаща**
 ```json
 {
-    "skin": {
+    "SKIN": {
         "url": "https://example.com/minecraft-auth/skins/slim.png",
         "digest": "MDk0NTFjMTZjM2EyNzBlZGNhYTUwNzMyYjJjNzNhMzk=",
         "metadata": {
             "model": "slim"
         }
     },
-    "cloak": {
-        "url": "https://example.com/minecraft-auth/cloaks/slim.png",
+    "CAPE": {
+        "url": "https://example.com/minecraft-auth/capes/slim.png",
         "digest": "ZGM5NGZkNzgyYzBjZmUyNzQ5YTgyNDJhOWI0NDkzNTA="
     }
 }
@@ -109,7 +109,7 @@ curl -O https://raw.githubusercontent.com/microwin7/GravitLauncher-TextureProvid
 - **При наличии только default скина**
 ```json
 {
-    "skin": {
+    "SKIN": {
         "url": "https://example.com/minecraft-auth/skins/default.png",
         "digest": "YjQ2ZTM4ODljNzBlMGJiOWUyYmExYzdkNGM2ZTI5Zjc="
     }
