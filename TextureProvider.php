@@ -136,7 +136,7 @@ class Check
             if (isset($data)) {
                 $msg = array(
                     'url' =>  Constants::getSkinURL($login),
-                    'digest' => base64_encode(md5($data))
+                    'digest' => base64_encode(md5($data, true))
                 );
                 if (self::slim($data)) $msg['metadata'] = array('model' => 'slim');
             }
@@ -144,7 +144,7 @@ class Check
             if (!empty($skin)) {
                 $msg = array(
                     'url' =>  $skinUrl,
-                    'digest' => base64_encode(md5($skin))
+                    'digest' => base64_encode(md5($skin, true))
                 );
                 if ($skinSlim) $msg['metadata'] = array('model' => 'slim');
             }
@@ -170,14 +170,14 @@ class Check
             if (isset($data)) {
                 $msg = array(
                     'url' => Constants::getCapeURL($login),
-                    'digest' => base64_encode(md5($data))
+                    'digest' => base64_encode(md5($data, true))
                 );
             }
         } else {
             if (!empty($cape)) {
                 $msg = array(
                     'url' => $capeUrl,
-                    'digest' => base64_encode(md5($cape))
+                    'digest' => base64_encode(md5($cape, true))
                 );
             }
         }
