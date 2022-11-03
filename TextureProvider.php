@@ -136,7 +136,7 @@ class Check
             if (isset($data)) {
                 $msg = array(
                     'url' =>  Constants::getSkinURL($login),
-                    'digest' => base64_encode(md5($data))
+                    'digest' => self::digest($data)
                 );
                 if (self::slim($data)) $msg['metadata'] = array('model' => 'slim');
             }
@@ -144,7 +144,7 @@ class Check
             if (!empty($skin)) {
                 $msg = array(
                     'url' =>  $skinUrl,
-                    'digest' => base64_encode(md5($skin))
+                    'digest' => self::digest($skin)
                 );
                 if ($skinSlim) $msg['metadata'] = array('model' => 'slim');
             }
@@ -170,18 +170,22 @@ class Check
             if (isset($data)) {
                 $msg = array(
                     'url' => Constants::getCapeURL($login),
-                    'digest' => base64_encode(md5($data))
+                    'digest' => self::digest($data)
                 );
             }
         } else {
             if (!empty($cape)) {
                 $msg = array(
                     'url' => $capeUrl,
-                    'digest' => base64_encode(md5($cape))
+                    'digest' => self::digest($cape)
                 );
             }
         }
         return $msg;
+    }
+    private static function digest($string)
+    {
+        return strtr(base64_encode(md5($string, true)), '+/', '-_');
     }
     public static function ci_find_file($filename)
     {
