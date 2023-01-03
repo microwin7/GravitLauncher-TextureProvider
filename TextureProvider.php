@@ -79,7 +79,7 @@ class Mojang
         self::mojangCape();
     }
 
-    public static function getMojangUUID(): string
+    public static function getMojangUUID()
     {
         if (self::$uuid == null) {
             $login = $_GET['login'];
@@ -87,26 +87,26 @@ class Mojang
             return self::$uuid = json_decode($data, true)['id'];
         } else return self::$uuid;
     }
-    public static function getMojangTextures(): array
+    public static function getMojangTextures()
     {
         if (self::$textures == null) {
             $data = Constants::getDataUrl('https://sessionserver.mojang.com/session/minecraft/profile/' . self::$uuid);
             return self::$textures = json_decode(base64_decode(json_decode($data, true)['properties'][0]['value']), true)['textures'];
         } else return self::$textures;
     }
-    public static function mojangSkinUrl(): string
+    public static function mojangSkinUrl()
     {
         if (self::$mojangSkinUrl == null) {
             return self::$mojangSkinUrl = self::getMojangTextures()['SKIN']['url'];
         } else return self::$mojangSkinUrl;
     }
-    public static function mojangSkin(): string
+    public static function mojangSkin()
     {
         if (self::$mojangSkin == null) {
             return self::$mojangSkin = Constants::getDataUrl(self::$mojangSkinUrl);
         } else return self::$mojangSkin;
     }
-    public static function mojangSkinSlim(): bool
+    public static function mojangSkinSlim()
     {
         if (self::$mojangSkinSlim == null) {
             return self::$mojangSkinSlim = isset(self::getMojangTextures()['SKIN']['metadata']['model']) ? true : false;
