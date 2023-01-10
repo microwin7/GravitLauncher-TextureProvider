@@ -221,6 +221,25 @@ function start()
         $cape = Check::cape($login, $method, $mojang::mojangCape(), $mojang::mojangCapeUrl());
         if (!empty($cape)) $msg['CAPE'] = $cape;
         response($msg);
+    } else if ($method == 'hybrid') {
+		if (!empty($type)) getTexture($login, $type);
+		$skin = Check::skin($login);
+		if(empty($skin))
+		{
+			$mojang = new Mojang();
+			$msg = [];
+			$skin = Check::skin($login, $method, $mojang::mojangSkin(), $mojang::mojangSkinUrl(), $mojang::mojangSkinSlim());
+			if (!empty($skin)) $msg['SKIN'] = $skin;
+			$cape = Check::cape($login, $method, $mojang::mojangCape(), $mojang::mojangCapeUrl());
+			if (!empty($cape)) $msg['CAPE'] = $cape;
+		}
+		else
+		{
+			$msg['SKIN'] = $skin;
+			$cape = Check::cape($login);
+			if (!empty($cape)) $msg['CAPE'] = $cape;
+		}
+        response($msg);
     } else {
         if (!empty($type)) getTexture($login, $type);
         $msg = [];
