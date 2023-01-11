@@ -264,17 +264,15 @@ function start()
     $result = new Result;
     switch ($method) {
         case 'normal':
-        case 'hybrid': {
-                $result->SKIN = Check::skin($login);
-                $result->CAPE = Check::cape($login);
-                if ($method == 'normal') continue;
-            }
-        case 'mojang': {
-                $mojang = new Mojang($login);
-                $result->SKIN = Check::skin($login, $method, $mojang->mojangSkin(), $mojang->mojangSkinUrl(), $mojang->mojangSkinSlim());
-                $result->CAPE = Check::cape($login, $method, $mojang->mojangCape(), $mojang->mojangCapeUrl());
-                continue;
-            }
+        case 'hybrid':
+            $result->SKIN = Check::skin($login);
+            $result->CAPE = Check::cape($login);
+            if ($method == 'normal') continue;
+        case 'mojang':
+            $mojang = new Mojang($login);
+            $result->SKIN = Check::skin($login, $method, $mojang->mojangSkin(), $mojang->mojangSkinUrl(), $mojang->mojangSkinSlim());
+            $result->CAPE = Check::cape($login, $method, $mojang->mojangCape(), $mojang->mojangCapeUrl());
+            break;
         default:
             response();
     }
