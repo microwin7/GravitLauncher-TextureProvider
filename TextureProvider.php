@@ -61,7 +61,7 @@ class Constants
     }
     private static function parseHeaders($headers)
     {
-        $head = array();
+        $head = [];
         foreach ($headers as $key => $value) {
             $t = explode(':', $value, 2);
             if (isset($t[1]))
@@ -152,19 +152,19 @@ class Check
         if ($method == 'normal') {
             [$data, $login] = Constants::getSkin($login);
             if (isset($data)) {
-                $msg = array(
+                $msg = [
                     'url' => Constants::getSkinURL($login),
                     'digest' => self::digest($data)
-                );
-                if (self::slim($data)) $msg['metadata'] = array('model' => 'slim');
+                ];
+                if (self::slim($data)) $msg['metadata'] = ['model' => 'slim'];
             }
         } else {
             if (!empty($skin)) {
-                $msg = array(
+                $msg = [
                     'url' => $skinUrl,
                     'digest' => self::digest($skin)
-                );
-                if ($skinSlim) $msg['metadata'] = array('model' => 'slim');
+                ];
+                if ($skinSlim) $msg['metadata'] = ['model' => 'slim'];
             }
         }
         return $msg;
@@ -186,17 +186,17 @@ class Check
         if ($method == 'normal') {
             [$data, $login] = Constants::getCape($login);
             if (isset($data)) {
-                $msg = array(
+                $msg = [
                     'url' => Constants::getCapeURL($login),
                     'digest' => self::digest($data)
-                );
+                ];
             }
         } else {
             if (!empty($cape)) {
-                $msg = array(
+                $msg = [
                     'url' => $capeUrl,
                     'digest' => self::digest($cape)
-                );
+                ];
             }
         }
         return $msg;
@@ -232,13 +232,22 @@ class Check
     {
         return strpos($haystack, $needle) !== false;
     }
-    public static function exists(...$var)
+}
+class Result
+{
+    protected $msg = [];
+
+    function __get($key)
     {
-        $i = true;
-        foreach ($var as $v) {
-            $i = (!empty($v) && isset($v) && $i) ? true : false;
-        }
-        return $i;
+        return $this->msg[$key];
+    }
+    function __set($key, $value)
+    {
+        if (!empty($value) && !isset($this->msg[$key])) $this->msg[$key] = $value;
+    }
+    public function getMsg()
+    {
+        return $this->msg;
     }
 }
 function start()
@@ -250,30 +259,26 @@ function start()
     $login = isset($_GET['login']) ? $_GET['login'] : null;
     $type = isset($_GET['type']) ? $_GET['type'] : null;
     $method = isset($_GET['method']) ? $_GET['method'] : 'normal'; // normal, mojang, hybrid (Default: normal)
-    $msg = [];
     Check::regex_valid_username($login) || Check::regex_valid_uuid_no_dash($login) ?: response();
     if (!empty($type)) getTexture($login, $type);
+    $result = new Result;
     switch ($method) {
         case 'normal':
         case 'hybrid': {
-                $skin = Check::skin($login);
-                if (!empty($skin)) $msg['SKIN'] = $skin;
-                $cape = Check::cape($login);
-                if (!empty($cape)) $msg['CAPE'] = $cape;
-                if ($method == 'normal') response($msg);
+                $result->SKIN = Check::skin($login);
+                $result->CAPE = Check::cape($login);
+                if ($method == 'normal') continue;
             }
         case 'mojang': {
                 $mojang = new Mojang($login);
-                $skin = Check::skin($login, $method, $mojang->mojangSkin(), $mojang->mojangSkinUrl(), $mojang->mojangSkinSlim());
-                if (!empty($skin) && !isset($msg['SKIN'])) $msg['SKIN'] = $skin;
-                $cape = Check::cape($login, $method, $mojang->mojangCape(), $mojang->mojangCapeUrl());
-                if (!empty($cape) && !isset($msg['CAPE'])) $msg['CAPE'] = $cape;
-                response($msg);
+                $result->SKIN = Check::skin($login, $method, $mojang->mojangSkin(), $mojang->mojangSkinUrl(), $mojang->mojangSkinSlim());
+                $result->CAPE = Check::cape($login, $method, $mojang->mojangCape(), $mojang->mojangCapeUrl());
+                continue;
             }
-            break;
         default:
             response();
     }
+    response($result->getMsg());
 }
 function getTexture($login, $type)
 {
@@ -285,8 +290,8 @@ function getTexture($login, $type)
             die(Constants::getSkin($login)[0]);
     }
 }
-function response($msg = null)
+function response($result = null)
 {
     header("Content-Type: application/json; charset=UTF-8");
-    die(json_encode((object) $msg, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+    die(json_encode((object) $result, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
 }
