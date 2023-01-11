@@ -1,6 +1,6 @@
 <?php
 #
-# Скрипт выдачи скинов и плащей. GravitLauncher 5.2.0+
+# Скрипт выдачи скинов и плащей. GravitLauncher v5.2.9+
 #
 # https://github.com/microwin7/GravitLauncher-TextureProvider
 #
