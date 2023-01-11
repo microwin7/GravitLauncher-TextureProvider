@@ -4,7 +4,6 @@
 #
 # https://github.com/microwin7/GravitLauncher-TextureProvider
 #
-mb_internal_encoding("UTF-8");
 start();
 class Constants
 {
@@ -253,6 +252,8 @@ class Result
 function start()
 {
     if (!extension_loaded('gd')) die(header("HTTP/1.0 403 Please enable or install the GD extension in your php.ini"));
+    if (!extension_loaded('mbstring')) die(header("HTTP/1.0 403 Please enable or install the mbstring extension in your php.ini"));
+    mb_internal_encoding("UTF-8");
     // ini_set('error_reporting', E_ALL); // FULL DEBUG
     // ini_set('display_errors', 1);
     // ini_set('display_startup_errors', 1);
