@@ -1,6 +1,6 @@
 # GravitLauncher-TextureProvider (JSON)
 
-![PHP 5.6.0](https://img.shields.io/badge/PHP-5.6.0-blue)
+![PHP 7.1+](https://img.shields.io/badge/PHP-7.1+-blue)
 ![Gravit Launcher](https://img.shields.io/badge/Gravit%20Launcher-5.2.9-brightgreen)
 
 ✔ Выдача данных для default (classic) и обнаружение slim скинов.
