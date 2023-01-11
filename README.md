@@ -21,7 +21,9 @@
 - PHP 5.6+
 - GravitLauncher 5.2.9+
 - LauncherAuthLib под версию 5.2.9+ [[СКАЧАТЬ]](https://mirror.gravit.pro/5.3.x/compat/authlib/) || AuthLib собранные [[СКАЧАТЬ]](https://mirror.gravit-support.ru/unofficial/authlib/)
+- Расширение mbstring `php-mbstring`. Пример для PHP 7.4: `sudo apt-get install php7.4-mbstring`
 - Расширение GD `php-gd`. Пример для PHP 7.4: `sudo apt-get install php7.4-gd`
+
 
 <h1 align="center">
 <br>
