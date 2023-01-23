@@ -8,9 +8,9 @@ start();
 class Constants
 {
     const SKIN_PATH = "./minecraft-auth/skins/"; // Сюда вписать путь до skins/
-    const CAPE_PATH = "./minecraft-auth/cloaks_test/"; // Сюда вписать путь до capes/
-    const SKIN_URL = "http://127.0.0.1/TextureProvider_mojang.php?login=%login%";
-    const CAPE_URL = "http://127.0.0.1/TextureProvider_mojang.php?login=%login%";
+    const CAPE_PATH = "./minecraft-auth/capes/"; // Сюда вписать путь до capes/
+    const SKIN_URL = "https://example.com/minecraft-auth/skins/%login%.png";
+    const CAPE_URL = "https://example.com/minecraft-auth/capes/%login%.png";
     const REGEX_USERNAME = "\w{1,16}$";
     const REGEX_UUID_NO_DASH = "[0-9a-f]{32}";
     const GIVE_DEFAULT = false; // Выдавать ли этим скриптом default скины и плащи, если упомянутые не найдены в папках. SKIN_URL и CAPE_URL должны содержать внешний путь к этому скрипту и ?login=%login% в конце
@@ -147,23 +147,26 @@ class Check
 {
     public static function skin($login, $method = 'normal', $skin = null, $skinUrl = null, $skinSlim = null)
     {
-        $result = new Result;
+        $msg = [];
         if ($method == 'normal') {
             [$data, $login] = Constants::getSkin($login);
             if (isset($data)) {
-                $result->url = Constants::getSkinURL($login);
-                $result->digest = self::digest($data);
-                // if (self::slim($data)) $result->metadata->model->st->aa = 'slim';
-                if (self::slim($data)) $result->metadata->model = 'slim';
+                $msg = [
+                    'url' => Constants::getSkinURL($login),
+                    'digest' => self::digest($data)
+                ];
+                if (self::slim($data)) $msg['metadata'] = ['model' => 'slim'];
             }
         } else {
             if (!empty($skin)) {
-                $result->url = $skinUrl;
-                $result->digest = self::digest($skin);
-                if ($skinSlim) $result->metadata = ['model' => 'slim'];
+                $msg = [
+                    'url' => $skinUrl,
+                    'digest' => self::digest($skin)
+                ];
+                if ($skinSlim) $msg['metadata'] = ['model' => 'slim'];
             }
         }
-        return $result;
+        return $msg;
     }
     private static function slim($data)
     {
@@ -178,20 +181,24 @@ class Check
     }
     public static function cape($login, $method = 'normal', $cape = null, $capeUrl = null)
     {
-        $result = new Result;
+        $msg = [];
         if ($method == 'normal') {
             [$data, $login] = Constants::getCape($login);
             if (isset($data)) {
-                $result->url = Constants::getCapeURL($login);
-                $result->digest = self::digest($data);
+                $msg = [
+                    'url' => Constants::getCapeURL($login),
+                    'digest' => self::digest($data)
+                ];
             }
         } else {
             if (!empty($cape)) {
-                $result->url = $capeUrl;
-                $result->digest = self::digest($cape);
+                $msg = [
+                    'url' => $capeUrl,
+                    'digest' => self::digest($cape)
+                ];
             }
         }
-        return $result;
+        return $msg;
     }
     private static function digest($string)
     {
@@ -227,16 +234,19 @@ class Check
 }
 class Result
 {
-    public function &__get($key)
+    protected $msg = [];
+
+    function __get($key)
     {
-        var_dump($key);
-        $this->$key ?? $this->$key = new Result($key);
-        // if (isset($this->$key) && !empty($this->$key)) $this->$key = new Result($key);
-        return $this->$key;
+        return $this->msg[$key];
     }
-    public function __set($key, $value)
-    {;
-        if (!empty($value) && !isset($this->$key)) $this->$key = $value;
+    function __set($key, $value)
+    {
+        if (!empty($value) && !isset($this->msg[$key])) $this->msg[$key] = $value;
+    }
+    public function getMsg()
+    {
+        return $this->msg;
     }
 }
 function start()
@@ -245,9 +255,9 @@ function start()
     if (!extension_loaded('mbstring')) die(header("HTTP/1.0 403 Please enable or install the mbstring extension in your php.ini"));
     if (strnatcmp(phpversion(), '7.1') < 0) die("Minimum PHP Version Requirement: 7.1\nYou use → " . phpversion());
     mb_internal_encoding("UTF-8");
-    ini_set('error_reporting', E_ALL); // FULL DEBUG
-    ini_set('display_errors', 1);
-    ini_set('display_startup_errors', 1);
+    // ini_set('error_reporting', E_ALL); // FULL DEBUG
+    // ini_set('display_errors', 1);
+    // ini_set('display_startup_errors', 1);
     $login = isset($_GET['login']) ? $_GET['login'] : null;
     $type = isset($_GET['type']) ? $_GET['type'] : null;
     $method = isset($_GET['method']) ? $_GET['method'] : 'normal'; // normal, mojang, hybrid (Default: normal)
@@ -261,17 +271,14 @@ function start()
             $result->CAPE = Check::cape($login);
             if ($method == 'normal') break;
         case 'mojang':
-            $result->gg->aa->bb = '1';
             $mojang = new Mojang($login);
-            var_export($result->SKIN->gettype);
-            var_export($result->CAPE);
-            if (empty((array) $result->SKIN)) $result->SKIN = Check::skin($login, $method, $mojang->mojangSkin(), $mojang->mojangSkinUrl(), $mojang->mojangSkinSlim());
-            if (empty((array) $result->CAPE)) $result->CAPE = Check::cape($login, $method, $mojang->mojangCape(), $mojang->mojangCapeUrl());
+            $result->SKIN = Check::skin($login, $method, $mojang->mojangSkin(), $mojang->mojangSkinUrl(), $mojang->mojangSkinSlim());
+            $result->CAPE = Check::cape($login, $method, $mojang->mojangCape(), $mojang->mojangCapeUrl());
             break;
         default:
             response();
     }
-    response($result);
+    response($result->getMsg());
 }
 function getTexture($login, $type)
 {
