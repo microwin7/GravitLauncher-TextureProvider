@@ -243,7 +243,7 @@ function start()
 {
     if (!extension_loaded('gd')) die(header("HTTP/1.0 403 Please enable or install the GD extension in your php.ini"));
     if (!extension_loaded('mbstring')) die(header("HTTP/1.0 403 Please enable or install the mbstring extension in your php.ini"));
-    if (strnatcmp(phpversion(), '7.4') < 0) die("Minimum PHP Version Requirement: 7.4\nYou use → " . phpversion());
+    if (strnatcmp(phpversion(), '7.1') < 0) die("Minimum PHP Version Requirement: 7.1\nYou use → " . phpversion());
     mb_internal_encoding("UTF-8");
     ini_set('error_reporting', E_ALL); // FULL DEBUG
     ini_set('display_errors', 1);
@@ -259,7 +259,7 @@ function start()
         case 'hybrid':
             $result->SKIN = Check::skin($login);
             $result->CAPE = Check::cape($login);
-            if ($method == 'normal') continue;
+            if ($method == 'normal') break;
         case 'mojang':
             $result->gg->aa->bb = '1';
             $mojang = new Mojang($login);

@@ -1,6 +1,6 @@
 # GravitLauncher-TextureProvider (JSON)
 
-![PHP 7.4+](https://img.shields.io/badge/PHP-7.4+-blue)
+![PHP 7.1+](https://img.shields.io/badge/PHP-7.1+-blue)
 ![Gravit Launcher](https://img.shields.io/badge/Gravit%20Launcher-v5.2.9+-brightgreen)
 
 ✔ Выдача данных для default (classic) и обнаружение slim скинов.
@@ -27,7 +27,7 @@
 
 # Требования
 
-- PHP 7.4+
+- PHP 7.1+
 - GravitLauncher 5.2.9+
 - LauncherAuthLib под версию 5.2.9+ [[СКАЧАТЬ]](https://mirror.gravit.pro/5.3.x/compat/authlib/) || AuthLib собранные [[СКАЧАТЬ]](https://mirror.gravit-support.ru/unofficial/authlib/)
 - Расширение mbstring `php-mbstring`. Пример для PHP 7.4: `sudo apt-get install php7.4-mbstring`
