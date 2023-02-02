@@ -16,6 +16,8 @@ class Constants
     const GIVE_DEFAULT = false; // Выдавать ли этим скриптом default скины и плащи, если упомянутые не найдены в папках. SKIN_URL и CAPE_URL должны содержать внешний путь к этому скрипту и ?login=%login% в конце
     const SKIN_DEFAULT = "iVBORw0KGgoAAAANSUhEUgAAAEAAAAAgCAMAAACVQ462AAAAWlBMVEVHcEwsHg51Ri9qQC+HVTgjIyNOLyK7inGrfWaWb1udZkj///9SPYmAUjaWX0FWScwoKCgAzMwAXl4AqKgAaGgwKHImIVtGOqU6MYkAf38AmpoAr68/Pz9ra2t3xPtNAAAAAXRSTlMAQObYZgAAAZJJREFUeNrUzLUBwDAUA9EPMsmw/7jhNljl9Xdy0J3t5CndmcOBT4Mw8/8P4pfB6sNg9yA892wQvwzSIr8f5JRzSeS7AaiptpxazUq8GPQB5uSe2DH644GTsDFsNrqB9CcDgOCAmffegWWwAExnBrljqowsFBuGYShY5oakgOXs/39zF6voDG9r+wLvTCVUcL+uV4m6uXG/L3Ut691697tgnZgJavinQHOB7DD8awmaLWEmaNuu7YGf6XcIITRm19P1ahbARCRGEc8x/UZ4CroXAQTVIGL0YySrREBADFGicS8XtG8CTS+IGU2F6EgSE34VNKoNz8348mzoXGDxpxkQBpg2bWobjgZSm+uiKDYH2BAO8C4YBmbgAjpq5jUl4yGJC46HQ7HJBfkeTAImIEmgmtpINi44JsHx+CKA/BTuArISXeBTR4AI5gK4C2JqRfPs0HNBkQnG8S4Yxw8IGoIZfXEBOW1D4YJDAdNSXgRevP+ylK6fGBCwsWywmA19EtBkJr8K2t4N5pnAVwH0jptsBp+2gUFj4tL5ywAAAABJRU5ErkJggg==";
     const CAPE_DEFAULT = "iVBORw0KGgoAAAANSUhEUgAAAEAAAAAgAQMAAACYU+zHAAAAA1BMVEVHcEyC+tLSAAAAAXRSTlMAQObYZgAAAAxJREFUeAFjGAV4AQABIAABL3HDQQAAAABJRU5ErkJggg==";
+    const SKIN_RESIZE = false;  // Скины преобразовываются на лету, копирую руку и ногу, для новых форматов. Чинит работу HD скинов с оптифайном на 1.16.5 версии
+                                // Для 1.7.10 требуется SkinPort (https://github.com/RetroForge/SkinPort/releases)
 
     public static function getSkinURL($login)
     {
@@ -29,14 +31,14 @@ class Constants
     {
         $path = Check::ci_find_file(self::SKIN_PATH . $login . '.png');
         return $path ? [
-            file_get_contents($path),
+            Utils::skin_resize(file_get_contents($path)),
             mb_substr(
                 mb_stristr($path, $login . '.png', false, mb_internal_encoding()),
                 0,
                 mb_strlen($login, mb_internal_encoding()),
                 mb_internal_encoding()
             )
-        ] : [(self::GIVE_DEFAULT && Check::contains(self::SKIN_URL, $_SERVER['PHP_SELF']) ? base64_decode(self::SKIN_DEFAULT) : null), $login];
+        ] : [(self::GIVE_DEFAULT && Check::contains(self::SKIN_URL, $_SERVER['PHP_SELF']) ? Utils::skin_resize(base64_decode(self::SKIN_DEFAULT)) : null), $login];
     }
     public static function getCape($login)
     {
@@ -230,6 +232,78 @@ class Check
     public static function contains($haystack, $needle)
     {
         return strpos($haystack, $needle) !== false;
+    }
+}
+class Utils
+{
+    public static function skin_resize($data)
+    {
+        if (Constants::SKIN_RESIZE) {
+            [$image, $x, $y, $fraction] = Utils::pre_calculation($data);
+            if ($x / 2 == $y) {
+                $canvas = Utils::create_canvas_transparent($x, $x);
+                imagecopy($canvas, $image, 0, 0, 0, 0, $x, $y);
+                $f_part = $fraction / 2;
+
+                $left_leg = $left_arm = Utils::create_canvas_transparent($f_part * 3, $f_part * 3); // 12x12
+                imagecopy($left_leg, $image, 0, 0, 0, $f_part * 5, $f_part * 3, $fraction * 4); // 0, 20 >> 12, 32
+                imageflip($left_leg, IMG_FLIP_HORIZONTAL);
+                imagecopy($canvas, $left_leg, $fraction * 2, $f_part * 13, 0, 0, $f_part * 3, $f_part * 3);
+
+                $left_leg2 = $left_arm2 = Utils::create_canvas_transparent($f_part, $f_part * 3); // 4x12
+                imagecopy($left_leg2, $image, 0, 0, $f_part * 3, $f_part * 5, $fraction * 2, $fraction * 4); // 12, 20 >> 16, 32
+                imageflip($left_leg2, IMG_FLIP_HORIZONTAL);
+                imagecopy($canvas, $left_leg2, $f_part * 7, $f_part * 13, 0, 0, $f_part, $f_part * 3);
+
+                imagecopy($left_arm, $image, 0, 0, $fraction * 5, $f_part * 5, $f_part * 13, $fraction * 4); // 40, 20 >> 52, 32
+                imageflip($left_arm, IMG_FLIP_HORIZONTAL);
+                imagecopy($canvas, $left_arm, $fraction * 4, $f_part * 13, 0, 0, $f_part * 3, $f_part * 3);
+
+                imagecopy($left_arm2, $image, 0, 0, $f_part * 13, $f_part * 5, $fraction * 7, $fraction * 4); // 52, 20 >> 56, 32
+                imageflip($left_arm2, IMG_FLIP_HORIZONTAL);
+                imagecopy($canvas, $left_arm2, $f_part * 11, $f_part * 13, 0, 0, $f_part, $f_part * 3);
+
+                $square = $square2 = $square3 = $square4 = Utils::create_canvas_transparent($f_part, $f_part); //4x4
+                imagecopy($square, $image, 0, 0, $f_part, $fraction * 2, $fraction, $f_part * 5); // 4, 16 >> 8, 20
+                imageflip($square, IMG_FLIP_HORIZONTAL);
+                imagecopy($canvas, $square, $f_part * 5, $fraction * 6, 0, 0, $f_part, $f_part);
+
+                imagecopy($square2, $image, 0, 0, $fraction, $fraction * 2, $f_part * 3, $f_part * 5); // 8, 16 >> 12, 20
+                imageflip($square2, IMG_FLIP_HORIZONTAL);
+                imagecopy($canvas, $square2, $fraction * 3, $fraction * 6, 0, 0, $f_part, $f_part);
+
+                imagecopy($square3, $image, 0, 0, $f_part * 11, $fraction * 2, $fraction * 6, $f_part * 5); // 44, 16 >> 48, 20
+                imageflip($square3, IMG_FLIP_HORIZONTAL);
+                imagecopy($canvas, $square3, $f_part * 9, $fraction * 6, 0, 0, $f_part, $f_part);
+
+                imagecopy($square4, $image, 0, 0, $fraction * 6, $fraction * 2, $f_part * 13, $f_part * 5); // 48, 16 >> 52, 20
+                imageflip($square4, IMG_FLIP_HORIZONTAL);
+                imagecopy($canvas, $square4, $fraction * 5, $fraction * 6, 0, 0, $f_part, $f_part);
+
+                ob_start();
+                imagepng($canvas);
+                $data = ob_get_clean();
+                ob_end_clean();
+            }
+        }
+        return $data;
+    }
+    public static function pre_calculation($data)
+    {
+        $image = imagecreatefromstring($data);
+        $x = imagesx($image);
+        $y = imagesy($image);
+        $fraction = $x / 8;
+        return [$image, $x, $y, $fraction];
+    }
+    public static function create_canvas_transparent($width, $height)
+    {
+        ini_set('gd.png_ignore_warning', 0);
+        $canvas = imagecreatetruecolor($width, $height);
+        $transparent = imagecolorallocatealpha($canvas, 255, 255, 255, 127);
+        imagefill($canvas, 0, 0, $transparent);
+        imagesavealpha($canvas, TRUE);
+        return $canvas;
     }
 }
 class Result
