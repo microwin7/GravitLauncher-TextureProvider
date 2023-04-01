@@ -51,7 +51,7 @@ class Constants
                 mb_strlen($login, mb_internal_encoding()),
                 mb_internal_encoding()
             )
-        ] : (self::GIVE_DEFAULT && Check::contains(self::CAPE_URL, $_SERVER['PHP_SELF']) ? base64_decode(self::CAPE_DEFAULT) : null);
+        ] : [(self::GIVE_DEFAULT && Check::contains(self::CAPE_URL, $_SERVER['PHP_SELF']) ? base64_decode(self::CAPE_DEFAULT) : null), $login];
     }
     public static function getDataUrl($url)
     {
