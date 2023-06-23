@@ -14,6 +14,7 @@ class Constants
     const REGEX_USERNAME = "\w{1,16}$";
     const REGEX_UUID_NO_DASH = "[0-9a-f]{32}";
     const GIVE_DEFAULT = false; // Выдавать ли этим скриптом default скины и плащи, если упомянутые не найдены в папках. SKIN_URL и CAPE_URL должны содержать внешний путь к этому скрипту и ?login=%login% в конце
+    const FOLDER_ROOT = ''; // Отношение публичной папки к корню сайта, эта часть пути будет удалена из пути вызова скрипта, необходимо для проверок. Пример: '/public'
     const SKIN_DEFAULT = "iVBORw0KGgoAAAANSUhEUgAAAEAAAAAgCAMAAACVQ462AAAAWlBMVEVHcEwsHg51Ri9qQC+HVTgjIyNO
     LyK7inGrfWaWb1udZkj///9SPYmAUjaWX0FWScwoKCgAzMwAXl4AqKgAaGgwKHImIVtGOqU6MYkAf38AmpoAr68/Pz9ra2t3xPtNAA
     AAAXRSTlMAQObYZgAAAZJJREFUeNrUzLUBwDAUA9EPMsmw/7jhNljl9Xdy0J3t5CndmcOBT4Mw8/8P4pfB6sNg9yA892wQvwzSIr8f
@@ -26,14 +27,16 @@ class Constants
     ZgAAAAxJREFUeAFjGAV4AQABIAABL3HDQQAAAABJRU5ErkJggg==";
     const SKIN_RESIZE = false;  // Скины преобразовываются на лету, копируя руку и ногу, для новых форматов. Чинит работу HD скинов с оптифайном на 1.16.5 версии
                                 // Для 1.7.10 требуется SkinPort (https://github.com/RetroForge/SkinPort/releases)
-
+    public static function getPhpSelf() {
+        return str_replace(self::FOLDER_ROOT, '', $_SERVER['PHP_SELF']);
+    }
     public static function getSkinURL($login)
     {
-        return str_replace('%login%', $login, self::SKIN_URL) . (Check::contains(self::SKIN_URL, $_SERVER['PHP_SELF'] . '?login=%login%') ? '&type=skin' : '');
+        return str_replace('%login%', $login, self::SKIN_URL) . (Check::contains(self::SKIN_URL, self::getPhpSelf() . '?login=%login%') ? '&type=skin' : '');
     }
     public static function getCapeURL($login)
     {
-        return str_replace('%login%', $login, self::CAPE_URL) . (Check::contains(self::CAPE_URL, $_SERVER['PHP_SELF'] . '?login=%login%') ? '&type=cape' : '');
+        return str_replace('%login%', $login, self::CAPE_URL) . (Check::contains(self::CAPE_URL, self::getPhpSelf() . '?login=%login%') ? '&type=cape' : '');
     }
     public static function getSkin($login)
     {
@@ -46,7 +49,7 @@ class Constants
                 mb_strlen($login, mb_internal_encoding()),
                 mb_internal_encoding()
             )
-        ] : [(self::GIVE_DEFAULT && Check::contains(self::SKIN_URL, $_SERVER['PHP_SELF']) ? Utils::skin_resize(base64_decode(self::SKIN_DEFAULT)) : null), $login];
+        ] : [(self::GIVE_DEFAULT && Check::contains(self::SKIN_URL, self::getPhpSelf()) ? Utils::skin_resize(base64_decode(self::SKIN_DEFAULT)) : null), $login];
     }
     public static function getCape($login)
     {
@@ -59,7 +62,7 @@ class Constants
                 mb_strlen($login, mb_internal_encoding()),
                 mb_internal_encoding()
             )
-        ] : [(self::GIVE_DEFAULT && Check::contains(self::CAPE_URL, $_SERVER['PHP_SELF']) ? base64_decode(self::CAPE_DEFAULT) : null), $login];
+        ] : [(self::GIVE_DEFAULT && Check::contains(self::CAPE_URL, self::getPhpSelf()) ? base64_decode(self::CAPE_DEFAULT) : null), $login];
     }
     public static function getDataUrl($url)
     {
