@@ -11,9 +11,9 @@ class Config
      * Путь к скрипту
      * Автоматически добавится домен из константы PathConfig::APP_URL
      * Если включён индекс файл index.php, ссылку можно указать как:
-     * 'GravitLauncher-TextureProvider/', тогда обязательно оставить / в конце
+     * 'texture-provider/', тогда обязательно оставить / в конце
      */
-    const SCRIPT_URL = 'GravitLauncher-TextureProvider/index.php';
+    const SCRIPT_URL = 'texture-provider/index.php';
     
     /**
      * Тип имени файлов для StorageType
@@ -23,7 +23,7 @@ class Config
      * DB_SHA1 - [sha1.png] работает только с связью с БД
      * DB_SHA256 - [sha256.png] работает только с связью с БД
      */
-    const USER_STORAGE_TYPE = UserStorageTypeEnum::DB_SHA256;
+    const USER_STORAGE_TYPE = UserStorageTypeEnum::USERNAME;
 
     /**
      * Выдавать ли рандомный скин из коллекции?
