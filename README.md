@@ -1,15 +1,19 @@
 # GravitLauncher-TextureProvider (JSON)
 
-![PHP 7.1+](https://img.shields.io/badge/PHP-7.1+-blue)
-![Gravit Launcher](https://img.shields.io/badge/Gravit%20Launcher-v5.2.9+-brightgreen)
+![PHP 8.2+](https://img.shields.io/badge/PHP-8.2+-blue)
+![Gravit Launcher](https://img.shields.io/badge/Gravit%20Launcher-v5.5.x+-brightgreen)
 
-✔ Выдача данных для default (classic) и обнаружение slim скинов.
+✔ Выдача по USERNAME, UUID, (id пользователя, хеша sha1 и sha256) из БД.
+
+✔ Поддеркжа выдачи из файловой системы, либо по USERNAME с Mojang
+
+✔ Возможность выдавать рандомный скин пользователям, которые ещё не установили его сами
+
+✔ Выдача скина и плаща по умолчанию, если не обнаружен в файловой системе, Mojang и выключено получение скина из рандомной коллекции скинов
 
 ✔ Работает с любыми общепринятыми размерами скинов и плащей
 
-✔ Может отдавать текстуры Mojang
-
-✔ Выдача скинов и плащей этим скриптом при желании
+✔ Автоматическое обнаружение SLIM типов скинов (тонкие руки)
 
 <p align="center">
     <img src="https://i.imgur.com/q0nkKNj.png" alt="demo" width="642">
@@ -17,133 +21,62 @@
 
 # Поддерживаемые методы
 
-- **`normal`** Отдаёт только по локальному пути или установленный скин и плащ по умолчанию
-  - Для отдачи по умолчанию **GIVE_DEFAULT** должен быть включен и отдача текстур должна быть через скрипт
+- **`normal`** Отдаёт только из файловой системы, рандомной коллекции скинов (если оное включено), скинов и плащей по умолчанию.
 - **`mojang`** Отдаёт текстуры с Mojang
   - Использование в вызове скрипта: **`&method=mojang`**
-- **`hybrid`** Отдаёт по локальному пути или с Mojang
-  - Для работы необходимо отключить **GIVE_DEFAULT**
+- **`hybrid`** = **`normal`** + **`mojang`**
   - Использование в вызове скрипта: **`&method=hybrid`**
+- **ОБЩЕЕ**
+  - Отдача скинов из рандомной коллекции, при отсутствии установленных пользователями. Если включено
+  - Отдача скинов и плащей по умолчанию. Если включено
 
 # Требования
 
-- PHP 7.1+
-- GravitLauncher 5.2.9+
-- LauncherAuthLib под версию 5.2.9+ [[СКАЧАТЬ]](https://mirror.gravit.pro/5.3.x/compat/authlib/) || AuthLib собранные [[СКАЧАТЬ]](https://mirror.gravit-support.ru/unofficial/authlib/)
-- Расширение mbstring `php-mbstring`. Пример для PHP 7.4: `sudo apt-get install php7.4-mbstring`
-- Расширение GD `php-gd`. Пример для PHP 7.4: `sudo apt-get install php7.4-gd`
+- PHP 8.2+
+- GravitLauncher 5.5.x+
+- Расширение Multibyte String `php-mbstring`. Пример для PHP 8.2: `sudo apt-get install php8.2-mbstring`
+- Расширение GD `php-gd`. Пример для PHP 8.2: `sudo apt-get install php8.2-gd`
+- Расширения PDO при работе с БД:
+  - Если **DB_DRIVER = 'PDO'** - `mysqli`. Пример для PHP 8.2: `sudo apt-get install php8.2-pdo`
+    - **[ MySQL Database ]** Если **DB_SUD_DB = 'mysql'** - `pdo_mysql`. Пример для PHP 8.2: `sudo apt-get install php8.2-pdo_mysql`
+      - Аргументы установки с игнорированием `mysqli`, `pdo_pgsql` расширений PHP, так как она не будет использоваться и может не быть в системе:
+      - 
+        ```bash
+        --ignore-platform-req=ext-mysqli --ignore-platform-req=ext-pdo_pgsql
+        ```
+    - **[ PostgreSQL Database ]** Если **DB_SUD_DB = 'pgsql'** - `pdo_pgsql`. Пример для PHP 8.2: `sudo apt-get install php8.2-pdo_pgsql`
+      - Аргументы установки с игнорированием `mysqli`, `pdo_mysql` расширений PHP, так как она не будет использоваться и может не быть в системе:
+      -
+        ```bash
+        --ignore-platform-req=ext-mysqli --ignore-platform-req=ext-pdo_mysql
+        ```
+- Расширения MySQLi при работе с БД:
+  - **[ MySQL Database ]** **DB_DRIVER = 'MySQLi'** - `mysqli`. Поддерживается только **DB_SUD_DB = 'mysql'**. Пример для PHP 8.2: `sudo apt-get install php8.2-mysqli`
+    - Аргументы установки с игнорированием `PDO`, `pdo_mysql`, `pdo_pgsql` расширений PHP, так как она не будет использоваться и может не быть в системе:
+    - 
+      ```bash
+      --ignore-platform-req=ext-pdo --ignore-platform-req=ext-pdo_mysql --ignore-platform-req=ext-pdo_pgsql
+      ```
+- Composer [СКАЧАТЬ Composer](https://getcomposer.org/download/)
+- Консольный доступ SSH к хостингу. Для развёртывания библиотек
+
 
 # Установка
 
 - Перейдите в каталог сайта
-```bash
-curl -O https://raw.githubusercontent.com/microwin7/GravitLauncher-TextureProvider/mojang/TextureProvider.php
-```
-
-# Настройка скрипта
-
-- **Настройка пути к скинам и плащам**
-```php
-    const SKIN_PATH = "./minecraft-auth/skins/"; // Сюда вписать путь до skins/
-    const CAPE_PATH = "./minecraft-auth/capes/"; // Сюда вписать путь до capes/
-```
-`../ - одна директория вверх`
-`minecraft-auth папка указана для примера`
-
-- **Настройка отдаваемых текстур (Не через скрипт)**
-```php
-    const SKIN_URL = "https://example.com/minecraft-auth/skins/%login%.png";
-    const CAPE_URL = "https://example.com/minecraft-auth/capes/%login%.png";
-```
-Можете спокойно перенести ссылки из уже настроеных в конфиге лаунчсервера, заменив только заполнитель на %login%
-
-- **Настройка отдаваемых текстур (Через скрипт)**
-```php
-    const SKIN_URL = "https://example.com/TextureProvider.php?login=%login%";
-    const CAPE_URL = "https://example.com/TextureProvider.php?login=%login%";
-```
-  - Работает только если ссылки выше указывают на сам скрипт и имеют окончание `?login=%login%`
-  - Не используйте с методом `hybrid`, будет выдавать по умолчанию как метод `normal`
-```php
-    const GIVE_DEFAULT = true;
-```
-
-# Настройка TextureProvider в LaunchServer.json
-
-- Запросы по умолчанию, методом **`normal`**
-  - **На имени пользователя**
-  ```json
-  "textureProvider":{
-        "url":"https://example.com/TextureProvider.php?login=%username%",
-        "type":"json"
-     }
+  - Установка через Composer:
+  ```bash
+  ...БУДЕТ ДОПОЛНЕНО...
   ```
-  - **На UUID**
-  ```json
-  "textureProvider":{
-        "url":"https://example.com/TextureProvider.php?login=%uuid%",
-        "type":"json"
-     }
+  - Установка через git:
+  ```bash
+  git clone --branch new https://github.com/microwin7/GravitLauncher-TextureProvider.git
+  ```
+  ```bash
+  cd GravitLauncher-TextureProvider
+  ```
+  ```bash
+  composer install
   ```
 
-- Запрос методом **`mojang`**
-  - `Для этого метода не требуется php-gd, информация о slim получается через Mojang API`
-  - **На имени пользователя**
-  ```json
-  "textureProvider":{
-        "url":"https://example.com/TextureProvider.php?login=%username%&method=mojang",
-        "type":"json"
-     }
-  ```
-  - **На UUID**
-  ```json
-  "textureProvider":{
-        "url":"https://example.com/TextureProvider.php?login=%uuid%&method=mojang",
-        "type":"json"
-     }
-  ```
-
-- Запрос методом **`hybrid`**
-  - **На имени пользователя**
-  ```json
-  "textureProvider":{
-        "url":"https://example.com/TextureProvider.php?login=%username%&method=hybrid",
-        "type":"json"
-     }
-  ```
-  - **На UUID**
-  ```json
-  "textureProvider":{
-        "url":"https://example.com/TextureProvider.php?login=%uuid%&method=hybrid",
-        "type":"json"
-     }
-  ```
-
-# Примеры ответа в браузере
-
-- **При наличии скина slim и плаща**
-```json
-{
-    "SKIN": {
-        "url": "https://example.com/minecraft-auth/skins/slim.png",
-        "digest": "MDk0NTFjMTZjM2EyNzBlZGNhYTUwNzMyYjJjNzNhMzk=",
-        "metadata": {
-            "model": "slim"
-        }
-    },
-    "CAPE": {
-        "url": "https://example.com/minecraft-auth/capes/slim.png",
-        "digest": "ZGM5NGZkNzgyYzBjZmUyNzQ5YTgyNDJhOWI0NDkzNTA="
-    }
-}
-```
-
-- **При наличии только default скина**
-```json
-{
-    "SKIN": {
-        "url": "https://example.com/minecraft-auth/skins/default.png",
-        "digest": "YjQ2ZTM4ODljNzBlMGJiOWUyYmExYzdkNGM2ZTI5Zjc="
-    }
-}
-```
+##  ...БУДЕТ ДОПОЛНЕНО...

@@ -1,0 +1,32 @@
+{
+    "name": "microwin7/texture-provider",
+    "description": "Предосталяет реализацию GravitLauncher TextureProvider JSON",
+    "type": "project",
+    "require": {
+        "php": "^8.2",
+        "ext-gd": "*",
+        "ext-mbstring": "*",
+        "ext-json": "*",
+        "microwin7/php-utils": "^1.5.0",
+        "symfony/console": "7.0.x-dev"
+    },
+    "license": "GPL-3.0-or-later",
+    "autoload": {
+        "psr-4": {
+            "Microwin7\\TextureProvider\\": "src/",
+            "Microwin7\\TextureProvider\\Configs\\": "config/texture-provider/",
+            "Microwin7\\PHPUtils\\Configs\\": "config/php-utils/^1.5.0/"
+        }
+    },
+    "authors": [
+        {
+            "name": "microwin7",
+            "email": "usa.microwin8@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "bin": [
+        ".bin/index",
+        ".bin/index.bat"
+    ]
+}
