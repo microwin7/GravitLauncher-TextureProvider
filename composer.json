@@ -18,13 +18,14 @@
             "Microwin7\\PHPUtils\\Configs\\": "config/php-utils/^1.5.0/"
         }
     },
+    "apcu-autoloader": true,
     "authors": [
         {
             "name": "microwin7",
             "email": "usa.microwin8@gmail.com"
         }
     ],
-    "minimum-stability": "dev",
+    "minimum-stability": "stable",
     "bin": [
         ".bin/index",
         ".bin/index.bat"
