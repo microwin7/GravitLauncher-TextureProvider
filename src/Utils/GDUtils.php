@@ -54,7 +54,6 @@ class GDUtils
                 ob_start();
                 imagepng($canvas);
                 $data = ob_get_clean();
-                ob_end_clean();
             }
         }
         return $data;

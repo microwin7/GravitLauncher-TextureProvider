@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace Microwin7\TextureProvider\Texture;
 
+use stdClass;
 use JsonSerializable;
 use Microwin7\PHPUtils\DB\Connector;
+use Microwin7\PHPUtils\DB\DriverPDO;
+use Microwin7\PHPUtils\DB\DriverMySQLi;
 use Microwin7\TextureProvider\Data\User;
 use Microwin7\PHPUtils\Configs\MainConfig;
 use Microwin7\PHPUtils\Configs\PathConfig;
@@ -21,31 +24,31 @@ use Microwin7\TextureProvider\Texture\Storage\MojangType;
 use Microwin7\TextureProvider\Texture\Storage\DefaultType;
 use Microwin7\TextureProvider\Texture\Storage\StorageType;
 use Microwin7\TextureProvider\Texture\Storage\CollectionType;
-use stdClass;
 
 class Texture implements JsonSerializable
 {
-    public              ?Skin                   $skin = null;
-    public              ?Cape                   $cape = null;
-    public              ?string                 $skinID = null;
-    public              ?string                 $capeID = null;
+    public              ?Skin                       $skin = null;
+    public              ?Cape                       $cape = null;
+    public              ?string                     $skinID = null;
+    public              ?string                     $capeID = null;
 
-    private             TextureStorageTypeEnum  $textureStorageType;
-    private readonly    StorageType             $storageType;
-    private readonly    MojangType              $mojangType;
-    private readonly    CollectionType          $collectionType;
-    private readonly    DefaultType             $defaultType;
+    private             TextureStorageTypeEnum      $textureStorageType;
+    private readonly    StorageType                 $storageType;
+    private readonly    MojangType                  $mojangType;
+    private readonly    CollectionType              $collectionType;
+    private readonly    DefaultType                 $defaultType;
 
-    private readonly    Connector               $DB;
+    private readonly    DriverPDO|DriverMySQLi      $DB;
 
     public function __construct(
-        public          User                    $user
+        public          User                        $user,
+                        DriverPDO|DriverMySQLi|null $DB = null // Only TextureProvider Module
     ) {
         $this->textureStorageType = $this->user->textureStorageType;
         if (
             $this->user->responseType === ResponseTypeEnum::JSON &&
             (Config::USER_STORAGE_TYPE === UserStorageTypeEnum::DB_SHA1 || Config::USER_STORAGE_TYPE === UserStorageTypeEnum::DB_SHA256)
-        ) $this->DB = new Connector;
+        ) $this->DB = null === $DB ? (new Connector)->{'TextureProvider'} : $DB;
         if ($this->textureStorageType === TextureStorageTypeEnum::STORAGE) {
             if ($this->user->responseType === ResponseTypeEnum::JSON) $this->generateTextureID();
             if ($this->user->responseType === ResponseTypeEnum::SKIN) $this->skinID = $this->user->login;
@@ -135,7 +138,7 @@ class Texture implements JsonSerializable
     }
     private function getTextureIDFromDB(): array|null
     {
-        $user_id = $this->DB->{'TextureProvider'}->query("SELECT " .
+        $user_id = $this->DB->query("SELECT " .
             MainConfig::MODULES['TextureProvider'][UserStorageTypeEnum::DB_USER_ID->name]
             . " FROM " .
             MainConfig::MODULES['TextureProvider']['table_user']
@@ -148,7 +151,7 @@ class Texture implements JsonSerializable
     {
         $skinID = '';
         $capeID = '';
-        foreach ($this->DB->{'TextureProvider'}->query("SELECT " .
+        foreach ($this->DB->query("SELECT " .
             MainConfig::MODULES['TextureProvider']['texture_type_column'] . ", "
             .
             MainConfig::MODULES['TextureProvider']['hash_column']

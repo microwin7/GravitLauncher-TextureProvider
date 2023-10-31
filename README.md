@@ -138,5 +138,13 @@
 - Путь до корня сайта в конфиге `config/php-utils/^1.5.0/PathConfig.php` константа: **ROOT_FOLDER**
 ### Локальные хранилища скинов и плащей
 - Пути от корня сайта в конфиге `config/php-utils/^1.5.0/TextureConfig.php` константы: **SKIN_URL_PATH** и **CAPE_URL_PATH**
+### Настройка LaunchServer
+```json
+      "textureProvider":{
+        "bearerToken" : "",
+        "url" : "http://example.com/texture-provider/index.php?username=%username%&uuid=%uuid%",
+        "type" : "json"
+      },
+```
 
 ##  ...БУДЕТ ДОПОЛНЕНО...
