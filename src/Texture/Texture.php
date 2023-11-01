@@ -176,7 +176,6 @@ class Texture implements JsonSerializable
     }
     public static function digest($data): string
     {
-        // return strtr(base64_encode(hash('sha256', $data, true)), '+/', '-_'); // For 5.4.x
         return hash('sha256', $data);
     }
     public function toArray(): array|stdClass

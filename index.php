@@ -17,5 +17,5 @@ try {
     if ($requestParams->responseType === ResponseTypeEnum::JSON) BearerToken::validationBearer() ?: throw new ValueError('Incorrect BearerToken');
     Response::response(new Texture(new User($requestParams)));
 } catch (Throwable $e) {
-    Response::failed(error: $e->getMessage(), code: 400);
+    Response::failed(error: $e->getMessage());
 }

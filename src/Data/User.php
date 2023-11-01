@@ -67,15 +67,13 @@ final class User
     }
     private function validParamsGenerateTexture()
     {
-        if ($this->username === null || $this->uuid === null || $this->methodType === null) throw new RequiredArgumentMissingException;
+        null !== $this->username || null !== $this->uuid ?: throw new RequiredArgumentMissingException(['username', 'uuid']);
         $this->setStartTextureStorageTypeEnum();
     }
     private function validParamsGetTexture()
     {
-        if (
-            ($this->login === null && $this->textureStorageType !== TextureStorageTypeEnum::DEFAULT) ||
-            $this->textureStorageType === null
-        ) throw new RequiredArgumentMissingException;
+        if ($this->login === null && $this->textureStorageType !== TextureStorageTypeEnum::DEFAULT
+        ) throw new RequiredArgumentMissingException('login');
         $this->username = $this->uuid = $this->login;
     }
     private function setStartTextureStorageTypeEnum(): void

@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "microwin7/php-utils",
-            "version": "v1.5.0.2",
+            "version": "v1.5.0.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/microwin7/PHP-Utils.git",
-                "reference": "6e9e76e721e02d39c6b018bc99aa3c3027fe162a"
+                "reference": "0c593df47bce01387ae1e705da4dd9a1571f15e2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/microwin7/PHP-Utils/zipball/6e9e76e721e02d39c6b018bc99aa3c3027fe162a",
-                "reference": "6e9e76e721e02d39c6b018bc99aa3c3027fe162a",
+                "url": "https://api.github.com/repos/microwin7/PHP-Utils/zipball/0c593df47bce01387ae1e705da4dd9a1571f15e2",
+                "reference": "0c593df47bce01387ae1e705da4dd9a1571f15e2",
                 "shasum": ""
             },
             "require": {
@@ -56,7 +56,7 @@
                 "issues": "https://github.com/microwin7/PHPUtil/issues",
                 "source": "https://github.com/microwin7/PHPUtil/tree/master"
             },
-            "time": "2023-10-23T17:38:02+00:00"
+            "time": "2023-11-01T05:20:33+00:00"
         },
         {
             "name": "microwin7/rcon",
@@ -161,12 +161,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/console.git",
-                "reference": "d7a88e0247eb39161d175745569ab346c6117dab"
+                "reference": "cc1dcd412018bd1826e3a21ffd4b8cee328281b6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/console/zipball/d7a88e0247eb39161d175745569ab346c6117dab",
-                "reference": "d7a88e0247eb39161d175745569ab346c6117dab",
+                "url": "https://api.github.com/repos/symfony/console/zipball/cc1dcd412018bd1826e3a21ffd4b8cee328281b6",
+                "reference": "cc1dcd412018bd1826e3a21ffd4b8cee328281b6",
                 "shasum": ""
             },
             "require": {
@@ -246,7 +246,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2023-10-17T13:48:31+00:00"
+            "time": "2023-10-31T17:59:56+00:00"
         },
         {
             "name": "symfony/polyfill-ctype",
