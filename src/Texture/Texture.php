@@ -47,7 +47,9 @@ class Texture implements JsonSerializable
         $this->textureStorageType = $this->user->textureStorageType;
         if (
             $this->user->responseType === ResponseTypeEnum::JSON &&
-            (Config::USER_STORAGE_TYPE === UserStorageTypeEnum::DB_SHA1 || Config::USER_STORAGE_TYPE === UserStorageTypeEnum::DB_SHA256)
+            (Config::USER_STORAGE_TYPE === UserStorageTypeEnum::DB_USER_ID ||
+                Config::USER_STORAGE_TYPE === UserStorageTypeEnum::DB_SHA1 ||
+                Config::USER_STORAGE_TYPE === UserStorageTypeEnum::DB_SHA256)
         ) $this->DB = null === $DB ? (new Connector)->{'TextureProvider'} : $DB;
         if ($this->textureStorageType === TextureStorageTypeEnum::STORAGE) {
             if ($this->user->responseType === ResponseTypeEnum::JSON) $this->generateTextureID();
@@ -145,7 +147,7 @@ class Texture implements JsonSerializable
             . " WHERE " .
             MainConfig::MODULES['TextureProvider']['uuid_column'] .
             " = ?", "s", $this->user->uuid)->value();
-        return [$user_id, $user_id];
+        return [(string)$user_id, (string)$user_id];
     }
     public function getTextureHashFromDB(): array|null
     {
