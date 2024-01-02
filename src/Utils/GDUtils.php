@@ -2,18 +2,19 @@
 
 namespace Microwin7\TextureProvider\Utils;
 
-use TypeError;
-use Microwin7\TextureProvider\Configs\Config;
+use Microwin7\PHPUtils\Utils\GDUtils as UtilsGDUtils;
+use Microwin7\TextureProvider\Config;
 
-class GDUtils
+class GDUtils extends UtilsGDUtils
 {
-    public static function skin_resize($data)
+    public static function skin_resize(string $data): string
     {
         if (Config::SKIN_RESIZE) {
             [$image, $x, $y, $fraction] = self::pre_calculation($data);
             if ($x / 2 == $y) {
                 $canvas = self::create_canvas_transparent($x, $x);
                 imagecopy($canvas, $image, 0, 0, 0, 0, $x, $y);
+                /** @var int $f_part */
                 $f_part = $fraction / 2;
 
                 $left_leg = $left_arm = self::create_canvas_transparent($f_part * 3, $f_part * 3); // 12x12
@@ -57,41 +58,5 @@ class GDUtils
             }
         }
         return $data;
-    }
-    public static function slim(string $data): bool
-    {
-        try {
-            $image = @imagecreatefromstring($data);
-            $fraction = imagesx($image) / 8;
-            $x = $fraction * 6.75;
-            $y = $fraction * 2.5;
-            $rgba = imagecolorsforindex($image, imagecolorat($image, $x, $y));
-            if ($rgba["alpha"] === 127)
-                return true;
-            else return false;
-        } catch (TypeError $e) {
-            throw new TypeError('Error read data. This file is not an image.');
-        }
-    }
-    public static function pre_calculation($data)
-    {
-        try {
-            $image = @imagecreatefromstring($data);
-            $x = imagesx($image);
-            $y = imagesy($image);
-            $fraction = $x / 8;
-            return [$image, $x, $y, $fraction];
-        } catch (TypeError $e) {
-            throw new TypeError('Error read data. This file is not an image.');
-        }
-    }
-    public static function create_canvas_transparent($width, $height): \GdImage
-    {
-        ini_set('gd.png_ignore_warning', 0);
-        $canvas = imagecreatetruecolor($width, $height);
-        $transparent = imagecolorallocatealpha($canvas, 255, 255, 255, 127);
-        imagefill($canvas, 0, 0, $transparent);
-        imagesavealpha($canvas, TRUE);
-        return $canvas;
     }
 }

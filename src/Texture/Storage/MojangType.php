@@ -4,14 +4,25 @@ declare(strict_types=1);
 
 namespace Microwin7\TextureProvider\Texture\Storage;
 
+use Microwin7\PHPUtils\Exceptions\UserNotFoundException;
 use Microwin7\PHPUtils\Request\Data;
 
 class MojangType
 {
-    private readonly    ?string $uuid;
-    private readonly    ?object $textures;
+    private readonly    string  $uuid;
+    /** @var object{
+     *  SKIN: object{
+     *    url: string,
+     *    metadata?: object{model: 'slim'|string}
+     *    },
+     *  CAPE?: object{
+     *    url: string
+     *  }
+     * }
+     */
+    private readonly    object  $textures;
     public              ?string $skinData = null;
-    public  readonly    ?string $skinUrl;
+    public  readonly    string  $skinUrl;
     public  readonly    bool    $skinSlim;
     public              ?string $capeData = null;
     public  readonly    ?string $capeUrl;
@@ -21,54 +32,117 @@ class MojangType
                         bool    $skinAlreadyDetected,
                         bool    $capeAlreadyDetected
     ) {
-        if (
-            !is_null($this->uuid = $this->getUUID()) &&
-            !is_null($this->textures = $this->getTextures()) &&
-            ($skinAlreadyDetected === false || $capeAlreadyDetected === false)
-        ) {
-            if (!is_null($this->skinUrl = $this->getSkinUrl()) && $skinAlreadyDetected === false) {
-                $this->skinData = $this->getSkinData();
-                $this->skinSlim = $this->checkIsSlim();
+        try {
+            if (
+                !is_null($this->uuid = $this->getUUID()) &&
+                !is_null($this->textures = $this->getTextures()) &&
+                ($skinAlreadyDetected === false || $capeAlreadyDetected === false)
+            ) {
+                if (!is_null($this->skinUrl = $this->getSkinUrl()) && $skinAlreadyDetected === false) {
+                    $this->skinData = $this->getSkinData();
+                    $this->skinSlim = $this->checkIsSlim();
+                }
+                if (!is_null($this->capeUrl = $this->getCapeUrl()) && $capeAlreadyDetected === false) {
+                    $this->capeData = $this->getCapeData();
+                }
             }
-            if (!is_null($this->capeUrl = $this->getCapeUrl()) && $capeAlreadyDetected === false) {
-                $this->capeData = $this->getCapeData();
-            }
+        } catch (UserNotFoundException | \RuntimeException $ignored) {
         }
     }
-    private function getUUID(): ?string
+    /** 
+     * @throws UserNotFoundException
+     */
+    private function getUUID(): string
     {
-        return json_decode(Data::getDataFromUrl('https://api.mojang.com/users/profiles/minecraft/' . $this->username))?->id;
+        if ($userProfile = Data::getDataFromUrl('https://api.mojang.com/users/profiles/minecraft/' . $this->username)) {
+            /** @var object{id: string, name: string} */
+            $decodeData = json_decode($userProfile);
+            return $decodeData->id;
+        }
+        throw new UserNotFoundException;
     }
-    private function getTextures(): ?object
+    /**
+     * @return object{
+     *  SKIN: object{
+     *    url: string,
+     *    metadata?: object{model: 'slim'|string}
+     *    },
+     *  CAPE?: object{
+     *    url: string
+     *  }
+     * }
+     * @throws \RuntimeException
+     */
+    private function getTextures(): object
     {
-        $profile = Data::getDataFromUrl('https://sessionserver.mojang.com/session/minecraft/profile/' . $this->uuid);
-        $properties = @json_decode($profile)?->properties;
-        if ($properties !== null) {
-            foreach ($properties as $property) {
-                if ($property?->name === 'textures' && is_string($property?->value))
-                    return json_decode(base64_decode($property->value))?->textures;
+        if ($profile = Data::getDataFromUrl('https://sessionserver.mojang.com/session/minecraft/profile/' . $this->uuid)) {
+            /** @var object{
+             *  id: string,
+             *  name: string,
+             *  properties: 
+             *    list<
+             *      object{
+             *        name: 'textures'|string,
+             *        value: string, 
+             *        signature?: string}
+             *    >,
+             *  profileActions: list[]
+             * }
+             */
+            $decodeData = json_decode($profile);
+            foreach ($decodeData->properties as $property) {
+                if ($property->name === 'textures') {
+                    /** @var object{
+                     *  timestamp: int,
+                     *  profileId: string,
+                     *  profileName: string,
+                     *  textures: object{
+                     *    SKIN: object{
+                     *      url: string,
+                     *      metadata?: object{model: 'slim'|string}
+                     *      },
+                     *    CAPE?: object{
+                     *      url: string
+                     *      }
+                     *  }
+                     * }
+                     * */
+                    $textureProperty = json_decode(base64_decode($property->value));
+                    return $textureProperty->textures;
+                }
             }
         }
-        return null;
+        throw new \RuntimeException;
     }
-    private function getSkinUrl(): ?string
+    private function getSkinUrl(): string
     {
-        return @$this->textures?->SKIN?->url;
+        return $this->textures->SKIN->url;
     }
-    private function getSkinData(): ?string
+    private function getSkinData(): string
     {
-        return Data::getDataFromUrl($this->skinUrl) ?: null;
+        $skinData = Data::getDataFromUrl($this->skinUrl);
+        if ($skinData) return $skinData;
+        throw new \RuntimeException;
     }
     private function checkIsSlim(): bool
     {
-        return @$this->textures?->SKIN?->metadata?->model === 'slim' ? true : false;
+        $skin = $this->textures->SKIN;
+        if (isset($skin->metadata)) {
+            return $skin->metadata->model === 'slim' ? true : false;
+        }
+        return false;
     }
     private function getCapeUrl(): ?string
     {
-        return @$this->textures?->CAPE?->url;
+        if (isset($this->textures->CAPE)) {
+            return $this->textures->CAPE->url;
+        }
+        return null;
     }
-    private function getCapeData(): ?string
+    private function getCapeData(): string
     {
-        return Data::getDataFromUrl($this->capeUrl) ?: null;
+        $capeData = Data::getDataFromUrl($this->capeUrl);
+        if ($capeData) return $capeData;
+        throw new \RuntimeException;
     }
 }

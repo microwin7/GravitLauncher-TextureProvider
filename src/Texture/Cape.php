@@ -4,22 +4,16 @@ declare(strict_types=1);
 
 namespace Microwin7\TextureProvider\Texture;
 
-use JsonSerializable;
-use Microwin7\TextureProvider\Utils\RequestParams;
+use Microwin7\PHPUtils\Contracts\Texture\Models\Cape as ModelCape;
 
-class Cape implements JsonSerializable
+final class Cape extends ModelCape
 {
-    public function __construct(
-        public readonly TextureStorageTypeEnum  $textureStorageType,
-        public readonly string                  $data,
-        public readonly string|RequestParams    $url
-    ) {
-    }
+    /** @return array{url: string, digest: string} */
     public function jsonSerialize(): array
     {
         return [
             'url' => Texture::urlComplete($this->textureStorageType, $this->url),
-            'digest' => Texture::digest($this->data),
+            'digest' => $this->digest,
         ];
     }
 }

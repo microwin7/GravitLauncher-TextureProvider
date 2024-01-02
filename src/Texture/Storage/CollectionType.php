@@ -4,20 +4,23 @@ declare(strict_types=1);
 
 namespace Microwin7\TextureProvider\Texture\Storage;
 
-use Microwin7\TextureProvider\Utils\GDUtils;
-use Microwin7\TextureProvider\Configs\Config;
-use Microwin7\TextureProvider\Texture\Texture;
-use Microwin7\TextureProvider\Data\ResponseTypeEnum;
-use Microwin7\TextureProvider\Texture\TextureStorageTypeEnum;
-use Microwin7\TextureProvider\Utils\IndexSkinRandomCollection;
-use Microwin7\TextureProvider\Utils\RequestParams;
 use TypeError;
+use Microwin7\TextureProvider\Config;
+use Microwin7\TextureProvider\Utils\GDUtils;
+use Microwin7\TextureProvider\Texture\Texture;
+use Microwin7\TextureProvider\Request\Provider\RequestParams;
+use Microwin7\PHPUtils\Contracts\Texture\Enum\ResponseTypeEnum;
+use Microwin7\TextureProvider\Utils\IndexSkinRandomCollection;
+use Microwin7\PHPUtils\Contracts\Texture\Enum\TextureStorageTypeEnum;
 
 class CollectionType
 {
     public              ?string             $skinData = null;
-    public readonly     RequestParams       $skinUrl;
+    /** @psalm-suppress PropertyNotSetInConstructor */
+    public readonly     string              $skinUrl;
+    /** @psalm-suppress PropertyNotSetInConstructor */
     public readonly     bool                $skinSlim;
+    public              null                $capeData = null;
 
     private IndexSkinRandomCollection       $index;
 
@@ -52,9 +55,12 @@ class CollectionType
             }
         }
     }
-    private function getSkinUrl(): RequestParams
+    private function getSkinUrl(): string
     {
-        return new RequestParams(ResponseTypeEnum::SKIN, TextureStorageTypeEnum::COLLECTION, $this->uuid);
+        return (string)(new RequestParams)
+            ->withEnum(ResponseTypeEnum::SKIN)
+            ->withEnum(TextureStorageTypeEnum::COLLECTION)
+            ->setVariable('login', $this->uuid);
     }
     private function checkIsSlim(): bool
     {

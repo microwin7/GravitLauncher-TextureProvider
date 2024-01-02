@@ -1,6 +1,6 @@
 # GravitLauncher-TextureProvider (JSON)
 
-![PHP 8.2+](https://img.shields.io/badge/PHP-8.2+-blue)
+![PHP 8.3+](https://img.shields.io/badge/PHP-8.3+-blue)
 ![Gravit Launcher](https://img.shields.io/badge/Gravit%20Launcher-v5.5.x+-brightgreen)
 
 ✔ Выдача по USERNAME, UUID, (id пользователя, хеша sha1 и sha256) из БД.
@@ -32,26 +32,26 @@
 
 # Требования
 
-- PHP 8.2+
+- PHP 8.3+
 - GravitLauncher 5.5.x+
-- Расширение Multibyte String `php-mbstring`. Пример для PHP 8.2: `sudo apt-get install php8.2-mbstring`
-- Расширение GD `php-gd`. Пример для PHP 8.2: `sudo apt-get install php8.2-gd`
+- Расширение Multibyte String `php-mbstring`. Пример для PHP 8.3: `sudo apt-get install php8.3-mbstring`
+- Расширение GD `php-gd`. Пример для PHP 8.3: `sudo apt-get install php8.3-gd`
 - Расширения PDO при работе с БД:
-  - Если **DB_DRIVER = 'PDO'** - `mysqli`. Пример для PHP 8.2: `sudo apt-get install php8.2-pdo`
-    - **[ MySQL Database ]** Если **DB_SUD_DB = 'mysql'** - `pdo_mysql`. Пример для PHP 8.2: `sudo apt-get install php8.2-pdo_mysql`
+  - Если **DB_DRIVER = 'PDO'** - `mysqli`. Пример для PHP 8.3: `sudo apt-get install php8.3-pdo`
+    - **[ MySQL Database ]** Если **DB_SUD_DB = 'mysql'** - `pdo_mysql`. Пример для PHP 8.3: `sudo apt-get install php8.3-pdo_mysql`
       - Аргументы установки с игнорированием `mysqli`, `pdo_pgsql` расширений PHP, так как она не будет использоваться и может не быть в системе:
       - 
         ```bash
         --ignore-platform-req=ext-mysqli --ignore-platform-req=ext-pdo_pgsql
         ```
-    - **[ PostgreSQL Database ]** Если **DB_SUD_DB = 'pgsql'** - `pdo_pgsql`. Пример для PHP 8.2: `sudo apt-get install php8.2-pdo_pgsql`
+    - **[ PostgreSQL Database ]** Если **DB_SUD_DB = 'pgsql'** - `pdo_pgsql`. Пример для PHP 8.3: `sudo apt-get install php8.3-pdo_pgsql`
       - Аргументы установки с игнорированием `mysqli`, `pdo_mysql` расширений PHP, так как она не будет использоваться и может не быть в системе:
       -
         ```bash
         --ignore-platform-req=ext-mysqli --ignore-platform-req=ext-pdo_mysql
         ```
 - Расширения MySQLi при работе с БД:
-  - **[ MySQL Database ]** **DB_DRIVER = 'MySQLi'** - `mysqli`. Поддерживается только **DB_SUD_DB = 'mysql'**. Пример для PHP 8.2: `sudo apt-get install php8.2-mysqli`
+  - **[ MySQL Database ]** **DB_DRIVER = 'MySQLi'** - `mysqli`. Поддерживается только **DB_SUD_DB = 'mysql'**. Пример для PHP 8.3: `sudo apt-get install php8.3-mysqli`
     - Аргументы установки с игнорированием `PDO`, `pdo_mysql`, `pdo_pgsql` расширений PHP, так как она не будет использоваться и может не быть в системе:
     - 
       ```bash
@@ -98,15 +98,16 @@
         - в поле **`uuid`** вы должны записать UUID пользователя
         - в поле **`name`** вы должны записать тип текстуры: **SKIN**, **CAPE**
         - в поле **`hash`** вы должны записать соответствующую хеш сумму файла
-        - в поле **`slim`** вы должны записать является ли скин **SLIM** - 1(да)
+        - в поле **`slim`** вы должны записать является ли скин **SLIM**: '1' или 'SLIM' (Да), '0' (Нет)
         - Поддержка поля **`slim`** пока что не реализована
       - Создание таблицы:
+      - НЕ АКТУАЛЬНО, будет отредактировано. СМОТРЕТЬ sql/mariadb/ для примера
       ```sql
       CREATE TABLE `user_assets` (
 	    `uuid` UUID,
 	    `name` ENUM('SKIN','CAPE'),
 	    `hash` TINYTEXT NOT NULL,
-	    `slim` BIT(1),
+	    `type` ENUM('SLIM'),
 	    PRIMARY KEY (`uuid`, `name`),
 	    INDEX `uuid` (`uuid`),
 	    INDEX `uuid_name` (`uuid`, `name`)
@@ -140,11 +141,24 @@
 - Пути от корня сайта в конфиге `config/php-utils/^1.5.0/TextureConfig.php` константы: **SKIN_URL_PATH** и **CAPE_URL_PATH**
 ### Настройка LaunchServer
 ```json
-      "textureProvider":{
-        "bearerToken" : "",
-        "url" : "http://example.com/texture-provider/index.php?username=%username%&uuid=%uuid%",
-        "type" : "json"
+      "textureProvider": {
+        "url": "http://127.0.0.1/texture-provider/index.php?username=%username%&uuid=%uuid%",
+        "type": "json"
+      },
+      "mixes": {
+        "textureLoader": {
+          "urls": {
+            "SKIN": "http://127.0.0.1/texture-provider/upload.php?type=SKIN",
+            "CAPE": "http://127.0.0.1/texture-provider/upload.php?type=CAPE"
+          },
+          "slimSupportConf": "SERVER",
+          "type": "uploadAsset"
+        }
       },
 ```
 
 ##  ...БУДЕТ ДОПОЛНЕНО...
+
+- Предположительно команда для использования на PRODUCTION, будет проверяться
+  - Оптимизирует импорты и кеширует классы автозагрузчика, если включен OpCache
+composer install -n -v -o -a --no-dev

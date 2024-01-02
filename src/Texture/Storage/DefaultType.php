@@ -5,22 +5,22 @@ declare(strict_types=1);
 namespace Microwin7\TextureProvider\Texture\Storage;
 
 use TypeError;
+use Microwin7\TextureProvider\Config;
 use Microwin7\TextureProvider\Utils\GDUtils;
 use Microwin7\PHPUtils\Configs\TextureConfig;
-use Microwin7\TextureProvider\Configs\Config;
 use Microwin7\TextureProvider\Texture\Texture;
-use Microwin7\TextureProvider\Utils\RequestParams;
-use Microwin7\TextureProvider\Data\ResponseTypeEnum;
-use Microwin7\TextureProvider\Texture\TextureStorageTypeEnum;
+use Microwin7\TextureProvider\Request\Provider\RequestParams;
+use Microwin7\PHPUtils\Contracts\Texture\Enum\ResponseTypeEnum;
+use Microwin7\PHPUtils\Contracts\Texture\Enum\TextureStorageTypeEnum;
 
 class DefaultType
 {
     public          ?string             $skinData = null;
-    public readonly RequestParams       $skinUrl;
+    public readonly string              $skinUrl;
     public readonly bool                $skinSlim;
 
     public          ?string             $capeData = null;
-    public readonly RequestParams       $capeUrl;
+    public readonly string              $capeUrl;
 
     function __construct(
                     ResponseTypeEnum    $responseType,
@@ -60,9 +60,12 @@ class DefaultType
             }
         }
     }
-    private function getSkinUrl(): RequestParams
+    private function getSkinUrl(): string
     {
-        return new RequestParams(ResponseTypeEnum::SKIN, TextureStorageTypeEnum::DEFAULT);
+        return (string)(new RequestParams)
+            ->withEnum(ResponseTypeEnum::SKIN)
+            ->withEnum(TextureStorageTypeEnum::DEFAULT)
+            ->setVariable('login', NULL);
     }
     private function checkIsSlim(): bool
     {
@@ -80,8 +83,11 @@ class DefaultType
     {
         return base64_decode(TextureConfig::CAPE_DEFAULT) ?: null;
     }
-    private function getCapeUrl(): RequestParams
+    private function getCapeUrl(): string
     {
-        return new RequestParams(ResponseTypeEnum::CAPE, TextureStorageTypeEnum::DEFAULT);
+        return (string)(new RequestParams)
+        ->withEnum(ResponseTypeEnum::CAPE)
+        ->withEnum(TextureStorageTypeEnum::DEFAULT)
+        ->setVariable('login', NULL);
     }
 }

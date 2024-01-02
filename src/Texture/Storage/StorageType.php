@@ -5,25 +5,25 @@ declare(strict_types=1);
 namespace Microwin7\TextureProvider\Texture\Storage;
 
 use TypeError;
+use Microwin7\TextureProvider\Config;
 use Microwin7\TextureProvider\Utils\GDUtils;
 use Microwin7\PHPUtils\Configs\TextureConfig;
-use Microwin7\TextureProvider\Configs\Config;
 use Microwin7\TextureProvider\Texture\Texture;
-use Microwin7\TextureProvider\Helpers\FileSystem;
-use Microwin7\TextureProvider\Utils\RequestParams;
-use Microwin7\TextureProvider\Data\ResponseTypeEnum;
+use Microwin7\PHPUtils\Helpers\FileSystem;
+use Microwin7\TextureProvider\Request\Provider\RequestParams;
+use Microwin7\PHPUtils\Contracts\Texture\Enum\ResponseTypeEnum;
 use Microwin7\PHPUtils\Utils\Texture as UtilsTexture;
-use Microwin7\TextureProvider\Data\UserStorageTypeEnum;
-use Microwin7\TextureProvider\Texture\TextureStorageTypeEnum;
+use Microwin7\PHPUtils\Contracts\User\UserStorageTypeEnum;
+use Microwin7\PHPUtils\Contracts\Texture\Enum\TextureStorageTypeEnum;
 
 class StorageType
 {
     public              ?string             $skinData = null;
-    public readonly     RequestParams       $skinUrl;
+    public readonly     string              $skinUrl;
     public readonly     bool                $skinSlim;
 
     public              ?string             $capeData = null;
-    public readonly     RequestParams       $capeUrl;
+    public readonly     string              $capeUrl;
 
     private readonly    FileSystem          $fileSystem;
 
@@ -66,7 +66,7 @@ class StorageType
     }
     private function skinResize(): void
     {
-        if (Config::SKIN_RESIZE && $this->skinData !== null) {
+        if (Config::SKIN_RESIZE) {
             try {
                 $this->skinData = GDUtils::skin_resize($this->skinData);
             } catch (TypeError $e) {
@@ -79,9 +79,14 @@ class StorageType
             }
         }
     }
-    private function getSkinUrl(): RequestParams
+    private function getSkinUrl(): string
     {
-        return new RequestParams(ResponseTypeEnum::SKIN, TextureStorageTypeEnum::STORAGE, $this->skinID);
+        $requestParams = new RequestParams;
+        $requestParams
+            ->withEnum(ResponseTypeEnum::SKIN)
+            ->withEnum(TextureStorageTypeEnum::STORAGE)
+            ->setVariable('login', $this->skinID);
+        return (string)$requestParams;
     }
     private function checkIsSlim(): bool
     {
@@ -112,8 +117,13 @@ class StorageType
                 file_get_contents($capePath) : null;
         }
     }
-    private function getCapeUrl(): RequestParams
+    private function getCapeUrl(): string
     {
-        return new RequestParams(ResponseTypeEnum::CAPE, TextureStorageTypeEnum::STORAGE, $this->capeID);
+        $requestParams = new RequestParams;
+        $requestParams
+            ->withEnum(ResponseTypeEnum::CAPE)
+            ->withEnum(TextureStorageTypeEnum::STORAGE)
+            ->setVariable('login', $this->capeID);
+        return (string)$requestParams;
     }
 }

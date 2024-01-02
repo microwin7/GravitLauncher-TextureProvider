@@ -1,9 +1,9 @@
 <?php
 
-namespace Microwin7\TextureProvider\Configs;
+namespace Microwin7\TextureProvider;
 
 use Microwin7\PHPUtils\Configs\PathConfig;
-use Microwin7\TextureProvider\Data\UserStorageTypeEnum;
+use Microwin7\PHPUtils\Contracts\User\UserStorageTypeEnum;
 
 class Config
 {
@@ -13,8 +13,8 @@ class Config
      * Если включён индекс файл index.php, ссылку можно указать как:
      * 'texture-provider/', тогда обязательно оставить / в конце
      */
-    const SCRIPT_URL = 'texture-provider/index.php';
-    
+    public const string SCRIPT_URL = 'texture-provider/index.php';
+
     /**
      * Тип имени файлов для StorageType
      * USERNAME - [username.png]
@@ -23,14 +23,20 @@ class Config
      * DB_SHA1 - [sha1.png] работает только с связью с БД
      * DB_SHA256 - [sha256.png] работает только с связью с БД
      */
-    const USER_STORAGE_TYPE = UserStorageTypeEnum::USERNAME;
+    public const UserStorageTypeEnum USER_STORAGE_TYPE = UserStorageTypeEnum::DB_SHA256;
 
     /**
      * Выдавать ли рандомный скин из коллекции?
      * Действует только на скины.
      * Приоритенее чем GIVE_DEFAULT_SKIN для скина
      */
-    const GIVE_FROM_COLLECTION = false;
+    public const bool GIVE_FROM_COLLECTION = true;
+    /**
+     * При несоответсвтии хеш суммы файла в кеше,
+     * либо при ненахождение файла из кеша в файловой системе,
+     * сколько раз пытаться перегенерировать кеш и повторить вызов метода?
+     */
+    public const int MAX_RE_GENERATE_CACHE_COUNT = 1;
     /**
      * Путь для хранения коллекции рандомных скинов.
      * При включении этого типа, создать папку и закинуть скины.
@@ -39,16 +45,27 @@ class Config
      * Для Windows: запустить index.bat из папки ".bin/"
      * При каждом изменении содержимого папки рандомной коллекции, кешировать повторно
      */
-    const SKIN_RANDOM_COLLECTION_PATH = PathConfig::ROOT_FOLDER . 'storage/skin_random_collection/';
+    public const string SKIN_RANDOM_COLLECTION_PATH = PathConfig::ROOT_FOLDER . 'storage/skin_random_collection/';
     /**
      * Выдавать ли default скины, если они не обнаружены в других источниках?
      */
-    const GIVE_DEFAULT_SKIN = true; // Выдавать ли этим скриптом default скины.
+    public const bool GIVE_DEFAULT_SKIN = true; // Выдавать ли этим скриптом default скины.
     /**
      * Выдавать ли default плащи, если они не обнаружены в других источниках?
      */
-    const GIVE_DEFAULT_CAPE = false;
+    public const bool GIVE_DEFAULT_CAPE = true;
 
-    const SKIN_RESIZE = true;  // Скины преобразовываются на лету, копируя руку и ногу, для новых форматов. Чинит работу HD скинов с оптифайном на 1.16.5 версии
+    public const bool SKIN_RESIZE = true;  // Скины преобразовываются на лету, копируя руку и ногу, для новых форматов. Чинит работу HD скинов с оптифайном на 1.16.5 версии
     // Для 1.7.10 требуется SkinPort (https://github.com/RetroForge/SkinPort/releases)
+
+    /**
+     * Ограничение для загрузки HD скинов и плащей по правам LuckPerms
+     * При использовании, обязательно настроить подключение к БД в MainConfig
+     */
+    public const bool USE_LUCKPERMS_PERMISSION_HD_SKIN = false;
+    /**
+     * Минимальный веса группы пользователя из LuckPerms для предоставления права устанавливать HD текстуры
+     * Число должно быть больше 0, 0 - группа по умолчанию, ограничивать не имеет смысла
+     */
+    public const int MIN_WEIGHT = 10;
 }

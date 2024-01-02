@@ -1,2 +1,6 @@
 /cache/
 /vendor/
+# Psalm
+log.txt
+log_no_color.txt
+psalm.sh

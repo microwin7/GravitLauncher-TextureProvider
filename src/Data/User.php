@@ -2,10 +2,11 @@
 
 namespace Microwin7\TextureProvider\Data;
 
-use Microwin7\TextureProvider\Data\MethodTypeEnum;
-use Microwin7\TextureProvider\Utils\RequestParams;
-use Microwin7\TextureProvider\Texture\TextureStorageTypeEnum;
+use Microwin7\TextureProvider\Request\Provider\RequestParams;
+use Microwin7\PHPUtils\Contracts\Texture\Enum\MethodTypeEnum;
+use Microwin7\PHPUtils\Contracts\Texture\Enum\ResponseTypeEnum;
 use Microwin7\PHPUtils\Exceptions\RequiredArgumentMissingException;
+use Microwin7\PHPUtils\Contracts\Texture\Enum\TextureStorageTypeEnum;
 
 final class User
 {
@@ -23,7 +24,6 @@ final class User
      * $login
      * Для восстановления
      * TextureStorageTypeEnum::STORAGE TextureStorageTypeEnum::COLLECTION
-     * @var string|null
      */
     public ?string $login;
     public ?string $username;
@@ -36,7 +36,7 @@ final class User
      *
      * @var TextureStorageTypeEnum
      */
-    public ?TextureStorageTypeEnum $textureStorageType;
+    public TextureStorageTypeEnum $textureStorageType;
     /**
      * From query param
      * 
@@ -46,34 +46,43 @@ final class User
      *
      * @var MethodTypeEnum
      */
-    public ?MethodTypeEnum $methodType;
+    public MethodTypeEnum $methodType;
     public function __construct(private RequestParams $requestParams)
     {
+        /** @var ResponseTypeEnum */
         $this->responseType = $requestParams->responseType;
+        /** @var string|null */
         $this->login = $requestParams->login;
+        /** @var string|null */
         $this->username = $requestParams->username;
+        /** @var string|null */
         $this->uuid = $requestParams->uuid;
+        /** @var TextureStorageTypeEnum */
         $this->textureStorageType = $requestParams->textureStorageType;
+        /** @var MethodTypeEnum */
         $this->methodType = $requestParams->methodType;
         $this->validParams();
     }
 
-    private function validParams()
+    private function validParams(): void
     {
         match ($this->responseType) {
             ResponseTypeEnum::JSON => $this->validParamsGenerateTexture(),
             ResponseTypeEnum::SKIN, ResponseTypeEnum::CAPE => $this->validParamsGetTexture()
         };
     }
-    private function validParamsGenerateTexture()
+    /** @throws RequiredArgumentMissingException */
+    private function validParamsGenerateTexture(): void
     {
         null !== $this->username || null !== $this->uuid ?: throw new RequiredArgumentMissingException(['username', 'uuid']);
         $this->setStartTextureStorageTypeEnum();
     }
-    private function validParamsGetTexture()
+    /** @throws RequiredArgumentMissingException */
+    private function validParamsGetTexture(): void
     {
-        if ($this->login === null && $this->textureStorageType !== TextureStorageTypeEnum::DEFAULT
-        ) throw new RequiredArgumentMissingException('login');
+        if ($this->login === null && $this->textureStorageType !== TextureStorageTypeEnum::DEFAULT)
+            throw new RequiredArgumentMissingException('login');
+        /** @var string */
         $this->username = $this->uuid = $this->login;
     }
     private function setStartTextureStorageTypeEnum(): void

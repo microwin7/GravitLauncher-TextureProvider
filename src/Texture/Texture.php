@@ -6,24 +6,23 @@ namespace Microwin7\TextureProvider\Texture;
 
 use stdClass;
 use JsonSerializable;
-use Microwin7\PHPUtils\DB\Connector;
-use Microwin7\PHPUtils\DB\DriverPDO;
-use Microwin7\PHPUtils\DB\DriverMySQLi;
+use Microwin7\TextureProvider\Config;
 use Microwin7\TextureProvider\Data\User;
 use Microwin7\PHPUtils\Configs\MainConfig;
 use Microwin7\PHPUtils\Configs\PathConfig;
 use Microwin7\TextureProvider\Texture\Cape;
 use Microwin7\TextureProvider\Texture\Skin;
-use Microwin7\TextureProvider\Configs\Config;
-use Microwin7\TextureProvider\Data\MethodTypeEnum;
-use Microwin7\TextureProvider\Utils\RequestParams;
+use Microwin7\PHPUtils\DB\SingletonConnector;
 use function Microwin7\PHPUtils\str_ends_with_slash;
-use Microwin7\TextureProvider\Data\ResponseTypeEnum;
-use Microwin7\TextureProvider\Data\UserStorageTypeEnum;
 use Microwin7\TextureProvider\Texture\Storage\MojangType;
+use Microwin7\PHPUtils\Contracts\User\UserStorageTypeEnum;
 use Microwin7\TextureProvider\Texture\Storage\DefaultType;
 use Microwin7\TextureProvider\Texture\Storage\StorageType;
+use Microwin7\PHPUtils\Contracts\Texture\Enum\MethodTypeEnum;
 use Microwin7\TextureProvider\Texture\Storage\CollectionType;
+use Microwin7\PHPUtils\Contracts\Texture\Enum\ResponseTypeEnum;
+use Microwin7\PHPUtils\Exceptions\RequiredArgumentMissingException;
+use Microwin7\PHPUtils\Contracts\Texture\Enum\TextureStorageTypeEnum;
 
 class Texture implements JsonSerializable
 {
@@ -33,24 +32,11 @@ class Texture implements JsonSerializable
     public              ?string                     $capeID = null;
 
     private             TextureStorageTypeEnum      $textureStorageType;
-    private readonly    StorageType                 $storageType;
-    private readonly    MojangType                  $mojangType;
-    private readonly    CollectionType              $collectionType;
-    private readonly    DefaultType                 $defaultType;
-
-    private readonly    DriverPDO|DriverMySQLi      $DB;
 
     public function __construct(
-        public          User                        $user,
-                        DriverPDO|DriverMySQLi|null $DB = null // Only TextureProvider Module
+        public          User                        $user
     ) {
         $this->textureStorageType = $this->user->textureStorageType;
-        if (
-            $this->user->responseType === ResponseTypeEnum::JSON &&
-            (Config::USER_STORAGE_TYPE === UserStorageTypeEnum::DB_USER_ID ||
-                Config::USER_STORAGE_TYPE === UserStorageTypeEnum::DB_SHA1 ||
-                Config::USER_STORAGE_TYPE === UserStorageTypeEnum::DB_SHA256)
-        ) $this->DB = null === $DB ? (new Connector)->{'TextureProvider'} : $DB;
         if ($this->textureStorageType === TextureStorageTypeEnum::STORAGE) {
             if ($this->user->responseType === ResponseTypeEnum::JSON) $this->generateTextureID();
             if ($this->user->responseType === ResponseTypeEnum::SKIN) $this->skinID = $this->user->login;
@@ -61,7 +47,7 @@ class Texture implements JsonSerializable
         if ($this->user->responseType !== ResponseTypeEnum::JSON) $this->ResponseTexture(null);
     }
 
-    private function findData()
+    private function findData(): void
     {
         if (
             $this->textureStorageType === TextureStorageTypeEnum::STORAGE &&
@@ -73,7 +59,7 @@ class Texture implements JsonSerializable
         if (
             $this->user->responseType === ResponseTypeEnum::JSON &&
             $this->textureStorageType === TextureStorageTypeEnum::MOJANG &&
-            ($this->user->methodType === MethodTypeEnum::MOJANG || $this->user->methodType === MethodTypeEnum::HYBRID)
+            in_array($this->user->methodType, [MethodTypeEnum::MOJANG, MethodTypeEnum::HYBRID])
         ) $this->mojang();
 
         if ($this->textureStorageType === TextureStorageTypeEnum::MOJANG) $this->nextTextureStorage();
@@ -92,28 +78,26 @@ class Texture implements JsonSerializable
         ) $this->default();
     }
 
-    private function storage()
+    private function storage(): void
     {
-        $this->storageType = new StorageType($this->skinID, $this->capeID, $this->user->responseType);
-        null === $this->storageType->skinData ?: $this->skin = new Skin($this->textureStorageType, $this->storageType->skinData, $this->storageType->skinUrl, $this->storageType->skinSlim);
-        null === $this->storageType->capeData ?: $this->cape = new Cape($this->textureStorageType, $this->storageType->capeData, $this->storageType->capeUrl);
+        $this->setTextures(new StorageType($this->skinID, $this->capeID, $this->user->responseType));
     }
-    private function mojang()
+    private function mojang(): void
     {
-        $this->mojangType = new MojangType($this->user->username, $this->skin ? true : false, $this->cape ? true : false);
-        null === $this->mojangType->skinData ?: $this->skin = new Skin($this->textureStorageType, $this->mojangType->skinData, $this->mojangType->skinUrl, $this->mojangType->skinSlim);
-        null === $this->mojangType->capeData ?: $this->cape = new Cape($this->textureStorageType, $this->mojangType->capeData, $this->mojangType->capeUrl);
+        $this->setTextures(new MojangType($this->user->username ?? throw new RequiredArgumentMissingException('username'), $this->skin ? true : false, $this->cape ? true : false));
     }
-    private function collection()
+    private function collection(): void
     {
-        $this->collectionType = new CollectionType($this->user->uuid, $this->user->responseType);
-        null === $this->collectionType->skinData ?: $this->skin = new Skin($this->textureStorageType, $this->collectionType->skinData, $this->collectionType->skinUrl, $this->collectionType->skinSlim);
+        $this->setTextures(new CollectionType($this->user->uuid ?? throw new RequiredArgumentMissingException('uuid'), $this->user->responseType));
     }
-    private function default()
+    private function default(): void
     {
-        $this->defaultType = new DefaultType($this->user->responseType, $this->skin ? true : false, $this->cape ? true : false);
-        null === $this->defaultType->skinData ?: $this->skin = new Skin($this->textureStorageType, $this->defaultType->skinData, $this->defaultType->skinUrl, $this->defaultType->skinSlim);
-        null === $this->defaultType->capeData ?: $this->cape = new Cape($this->textureStorageType, $this->defaultType->capeData, $this->defaultType->capeUrl);
+        $this->setTextures(new DefaultType($this->user->responseType, $this->skin ? true : false, $this->cape ? true : false));
+    }
+    private function setTextures(StorageType|MojangType|CollectionType|DefaultType $storageType): void
+    {
+        null === $storageType->skinData ?: $this->skin = new Skin($this->textureStorageType, $storageType->skinData, $storageType->skinUrl, $storageType->skinSlim);
+        null === $storageType->capeData ?: $this->cape = new Cape($this->textureStorageType, $storageType->capeData, $storageType->capeUrl);
     }
     /**
      * Если MethodTypeEnum не равен MOJANG, то список начинается сначала и идёт до конца,
@@ -131,6 +115,7 @@ class Texture implements JsonSerializable
     }
     private function generateTextureID(): void
     {
+        /** @psalm-suppress TypeDoesNotContainType */
         [$this->skinID, $this->capeID] = match (Config::USER_STORAGE_TYPE) {
             UserStorageTypeEnum::USERNAME => [$this->user->username, $this->user->username],
             UserStorageTypeEnum::UUID => [$this->user->uuid, $this->user->uuid],
@@ -138,47 +123,62 @@ class Texture implements JsonSerializable
             UserStorageTypeEnum::DB_SHA1, UserStorageTypeEnum::DB_SHA256 => $this->getTextureHashFromDB()
         };
     }
-    private function getTextureIDFromDB(): array|null
+    private function getTextureIDFromDB(): array
     {
-        $user_id = $this->DB->query("SELECT " .
-            MainConfig::MODULES['TextureProvider'][UserStorageTypeEnum::DB_USER_ID->name]
-            . " FROM " .
-            MainConfig::MODULES['TextureProvider']['table_user']
-            . " WHERE " .
-            MainConfig::MODULES['TextureProvider']['uuid_column'] .
-            " = ?", "s", $this->user->uuid)->value();
+        $MODULE_ARRAY_DATA =MainConfig::MODULES['TextureProvider'];
+        $user_id_column = $MODULE_ARRAY_DATA['table_user']['id_column'];
+        $table_user = $MODULE_ARRAY_DATA['table_user']['TABLE_NAME'];
+        $uuid_column = $MODULE_ARRAY_DATA['table_user']['uuid_column'];
+        /** @var int|string $user_id */
+        $user_id = SingletonConnector::get('TextureProvider')->query(<<<SQL
+            SELECT $user_id_column 
+            FROM $table_user 
+            WHERE $uuid_column = ?
+        SQL, "s", $this->user->uuid)->value();
         return [(string)$user_id, (string)$user_id];
     }
-    public function getTextureHashFromDB(): array|null
+    /** @return array{0: null|string, 1: null|string} */
+    public function getTextureHashFromDB(): array
     {
-        $skinID = '';
-        $capeID = '';
-        foreach ($this->DB->query("SELECT " .
-            MainConfig::MODULES['TextureProvider']['texture_type_column'] . ", "
-            .
-            MainConfig::MODULES['TextureProvider']['hash_column']
-            . " FROM " .
-            MainConfig::MODULES['TextureProvider']['table_user_assets']
-            . " WHERE " .
-            MainConfig::MODULES['TextureProvider']['uuid_column'] .
-            " = ?", "s", $this->user->uuid)->array() as $v) {
-            if (ResponseTypeEnum::SKIN === ResponseTypeEnum::tryFromString($v[MainConfig::MODULES['TextureProvider']['texture_type_column']]))
-                $skinID = $v[MainConfig::MODULES['TextureProvider']['hash_column']];
-            if (ResponseTypeEnum::CAPE === ResponseTypeEnum::tryFromString($v[MainConfig::MODULES['TextureProvider']['texture_type_column']]))
-                $capeID = $v[MainConfig::MODULES['TextureProvider']['hash_column']];
+        $skinID = null;
+        $capeID = null;
+        $MODULE_ARRAY_DATA =MainConfig::MODULES['TextureProvider'];
+
+        $table_users = $MODULE_ARRAY_DATA['table_user']['TABLE_NAME'];
+        $table_user_assets = $MODULE_ARRAY_DATA['table_user_assets']['TABLE_NAME'];
+
+        $texture_type_column = $MODULE_ARRAY_DATA['table_user_assets']['texture_type_column'];
+        $hash_column = $MODULE_ARRAY_DATA['table_user_assets']['hash_column'];
+        $texture_meta_column = $MODULE_ARRAY_DATA['table_user_assets']['texture_meta_column'];
+
+        $user_id_column = $MODULE_ARRAY_DATA['table_user']['id_column'];
+        $assets_id_column = $MODULE_ARRAY_DATA['table_user_assets']['id_column'];
+        $user_uuid_column = $MODULE_ARRAY_DATA['table_user']['uuid_column'];
+        
+        /** @var list<array<string, string>> $result */
+        $result = SingletonConnector::get('TextureProvider')->query(<<<SQL
+            SELECT $texture_type_column , $hash_column, $texture_meta_column
+            FROM $table_user_assets as ASSETS
+            INNER JOIN $table_users as USERS
+            ON ASSETS.$assets_id_column = USERS.$user_id_column
+            WHERE USERS.$user_uuid_column = ?
+        SQL, "s", $this->user->uuid);
+        foreach ($result as $v) {
+            if (ResponseTypeEnum::SKIN === ResponseTypeEnum::tryFromString($v[$texture_type_column])) {
+                $skinID = $v[$hash_column];
+                // Need Add meta
+            }
+            if (ResponseTypeEnum::CAPE === ResponseTypeEnum::tryFromString($v[$texture_type_column]))
+                $capeID = $v[$hash_column];
         }
         return [$skinID, $capeID];
     }
-    public static function urlComplete(TextureStorageTypeEnum $textureStorageType, string|RequestParams $url): string
+    public static function urlComplete(TextureStorageTypeEnum $textureStorageType, string $url): string
     {
         return match ($textureStorageType) {
             TextureStorageTypeEnum::MOJANG => $url,
             default => str_ends_with_slash(PathConfig::APP_URL) . Config::SCRIPT_URL . $url, // GET Params
         };
-    }
-    public static function digest($data): string
-    {
-        return hash('sha256', $data);
     }
     public function toArray(): array|stdClass
     {
@@ -191,7 +191,7 @@ class Texture implements JsonSerializable
     {
         return $this->toArray();
     }
-    public static function ResponseTexture(string|null $data)
+    public static function ResponseTexture(string|null $data): never
     {
         if ($data == null) {
             http_response_code(404);

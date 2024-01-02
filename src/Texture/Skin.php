@@ -4,23 +4,16 @@ declare(strict_types=1);
 
 namespace Microwin7\TextureProvider\Texture;
 
-use JsonSerializable;
-use Microwin7\TextureProvider\Utils\RequestParams;
+use Microwin7\PHPUtils\Contracts\Texture\Models\Skin as ModelSkin;
 
-class Skin implements JsonSerializable
+final class Skin extends ModelSkin
 {
-    public function __construct(
-        public readonly TextureStorageTypeEnum  $textureStorageType,
-        public readonly string                  $data,
-        public readonly string|RequestParams    $url,
-        public readonly bool                    $isSlim,
-    ) {
-    }
+    /** @return array{url: string, digest: string, metadata?: array{model: 'slim'}} */
     public function jsonSerialize(): array
     {
         $json = [
             'url' => Texture::urlComplete($this->textureStorageType, $this->url),
-            'digest' => Texture::digest($this->data),
+            'digest' => $this->digest,
         ];
         if ($this->isSlim) $json['metadata'] = ['model' => 'slim'];
         return $json;
