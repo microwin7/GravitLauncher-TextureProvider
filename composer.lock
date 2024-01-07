@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6fed6ce95bf4520c5e5515cb05ac9437",
+    "content-hash": "940f56a8acadb2a9f93658fc2153a3fb",
     "packages": [
         {
             "name": "firebase/php-jwt",
@@ -249,16 +249,16 @@
         },
         {
             "name": "microwin7/php-utils",
-            "version": "dev-main",
+            "version": "v1.6.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/microwin7/PHP-Utils.git",
-                "reference": "a4f59471bd420a2c0fb37a472dc121acc13f8103"
+                "reference": "3837e522928564e6d001c0a460ad9bc9555234c5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/microwin7/PHP-Utils/zipball/a4f59471bd420a2c0fb37a472dc121acc13f8103",
-                "reference": "a4f59471bd420a2c0fb37a472dc121acc13f8103",
+                "url": "https://api.github.com/repos/microwin7/PHP-Utils/zipball/3837e522928564e6d001c0a460ad9bc9555234c5",
+                "reference": "3837e522928564e6d001c0a460ad9bc9555234c5",
                 "shasum": ""
             },
             "require": {
@@ -276,7 +276,6 @@
             "require-dev": {
                 "vimeo/psalm": "5.x-dev"
             },
-            "default-branch": true,
             "type": "library",
             "autoload": {
                 "files": [
@@ -301,7 +300,7 @@
                 "issues": "https://github.com/microwin7/PHPUtil/issues",
                 "source": "https://github.com/microwin7/PHPUtil/tree/master"
             },
-            "time": "2024-01-07T14:56:29+00:00"
+            "time": "2024-01-07T18:14:28+00:00"
         },
         {
             "name": "microwin7/rcon",
@@ -2759,7 +2758,6 @@
     "aliases": [],
     "minimum-stability": "dev",
     "stability-flags": {
-        "microwin7/php-utils": 20,
         "symfony/console": 20,
         "sentry/sentry": 20,
         "firebase/php-jwt": 20,
