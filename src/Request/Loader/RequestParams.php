@@ -36,9 +36,12 @@ final class RequestParams extends RequestParamsAbstract
          * @var TextureStorageTypeEnum $this->textureStorageType
          * @var string $this->login
          */
-        return '?' .
-            'type=' . $this->responseType->name .
-            '&storage=' . $this->textureStorageType->name .
-            '&login=' . $this->login;
+        return '?' . http_build_query(
+            [
+                ResponseTypeEnum::getNameRequestVariable() => $this->responseType->name,
+                TextureStorageTypeEnum::getNameRequestVariable() => $this->textureStorageType->name,
+                'login' => $this->login,
+            ]
+        );
     }
 }

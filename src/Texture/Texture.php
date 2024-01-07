@@ -125,7 +125,7 @@ class Texture implements JsonSerializable
     }
     private function getTextureIDFromDB(): array
     {
-        $MODULE_ARRAY_DATA =MainConfig::MODULES['TextureProvider'];
+        $MODULE_ARRAY_DATA = MainConfig::MODULES['TextureProvider'];
         $user_id_column = $MODULE_ARRAY_DATA['table_user']['id_column'];
         $table_user = $MODULE_ARRAY_DATA['table_user']['TABLE_NAME'];
         $uuid_column = $MODULE_ARRAY_DATA['table_user']['uuid_column'];
@@ -142,7 +142,7 @@ class Texture implements JsonSerializable
     {
         $skinID = null;
         $capeID = null;
-        $MODULE_ARRAY_DATA =MainConfig::MODULES['TextureProvider'];
+        $MODULE_ARRAY_DATA = MainConfig::MODULES['TextureProvider'];
 
         $table_users = $MODULE_ARRAY_DATA['table_user']['TABLE_NAME'];
         $table_user_assets = $MODULE_ARRAY_DATA['table_user_assets']['TABLE_NAME'];
@@ -154,7 +154,7 @@ class Texture implements JsonSerializable
         $user_id_column = $MODULE_ARRAY_DATA['table_user']['id_column'];
         $assets_id_column = $MODULE_ARRAY_DATA['table_user_assets']['id_column'];
         $user_uuid_column = $MODULE_ARRAY_DATA['table_user']['uuid_column'];
-        
+
         /** @var list<array<string, string>> $result */
         $result = SingletonConnector::get('TextureProvider')->query(<<<SQL
             SELECT $texture_type_column , $hash_column, $texture_meta_column
@@ -185,6 +185,10 @@ class Texture implements JsonSerializable
         $json = [];
         if ($this->skin) $json['SKIN'] = $this->skin;
         if ($this->cape) $json['CAPE'] = $this->cape;
+        // $json['AVATAR'] = [
+        //     'url' => 'http://127.0.0.1/TextureReturner.php?method=avatar&size=42&login=' . $this->user->username,
+        //     // 'digest' => ''
+        // ];
         return !empty($json) ? $json : new stdClass;
     }
     public function jsonSerialize(): array|stdClass

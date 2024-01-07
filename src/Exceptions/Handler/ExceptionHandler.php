@@ -2,24 +2,13 @@
 
 namespace Microwin7\PHPUtils\Exceptions\Handler;
 
+use Throwable;
 use Microwin7\PHPUtils\Configs\MainConfig;
 use Microwin7\PHPUtils\Response\JsonResponse;
+use Microwin7\PHPUtils\Exceptions\FileUploadException;
+use Microwin7\PHPUtils\Exceptions\TextureSizeException;
 use Microwin7\PHPUtils\Exceptions\RequiredArgumentMissingException;
 
-/**
- * Use:
- *     "autoload": {
- *         "psr-4": {
- *             "Microwin7\\PHPUtils\\Exceptions\\Handler\\": "src/Exceptions/Handler/",
- *         }
- *     },
- * Need AutoLoads or creater object
- *     "autoload": {
- *         "files": [
- *             "src/AutoLoads/InitExceptionHandler.php",
- *         ]
- *     },
- */
 class ExceptionHandler
 {
     public function __construct()
@@ -36,9 +25,6 @@ class ExceptionHandler
     }
     public function exception_handler(\Throwable $e): void
     {
-        /**
-         * Example:
-         */
         if ($e instanceof \InvalidArgumentException) {
             $this->error('InvalidArgumentException');
             // provided key/key-array is empty or malformed.
@@ -74,18 +60,24 @@ class ExceptionHandler
             // provided JWT algorithm does not match provided key OR
             // provided key ID in key/key-array is empty or invalid.
         }
-        if ($e instanceof RequiredArgumentMissingException) {
+        if (
+            $e instanceof RequiredArgumentMissingException ||
+            $e instanceof FileUploadException ||
+            $e instanceof TextureSizeException
+        ) {
             $this->error($e);
         }
-        if ($e instanceof \Throwable) {
+        if ($e instanceof Throwable) {
             if (MainConfig::SENTRY_ENABLE) \Sentry\captureException($e);
             $this->error($e);
         }
     }
-    /** @param interface<\Throwable>|string $error */
+    /** @param interface-string<Throwable>|string $error */
     private function error($error): never
     {
-        if ($error instanceof \Throwable) JsonResponse::failed(error: $error->getMessage());
+        if ($error instanceof Throwable) {
+            JsonResponse::failed(error: $error->getMessage());
+        }
         JsonResponse::failed(error: $error);
     }
 }

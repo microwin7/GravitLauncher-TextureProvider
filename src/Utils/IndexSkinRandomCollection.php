@@ -2,9 +2,10 @@
 
 namespace Microwin7\TextureProvider\Utils;
 
+use Microwin7\PHPUtils\Utils\Texture;
 use Microwin7\TextureProvider\Config;
-use Microwin7\PHPUtils\Response\JsonResponse;
 use Microwin7\PHPUtils\Helpers\FileSystem;
+use Microwin7\PHPUtils\Response\JsonResponse;
 use function Microwin7\PHPUtils\str_ends_with_slash;
 use Microwin7\PHPUtils\Exceptions\NeedRe_GenerateCache;
 
@@ -27,7 +28,7 @@ class IndexSkinRandomCollection
 
             $this->indexArray[] = [
                 'file' => str_replace(str_ends_with_slash(Config::SKIN_RANDOM_COLLECTION_PATH), '', $file),
-                'hash' => $this->hash($data),
+                'hash' => Texture::digest($data),
             ];
         }
         $directory = dirname($this->indexPath);
@@ -53,7 +54,7 @@ class IndexSkinRandomCollection
                     $modulo = $uuiddec % $count;
                     $index = $fileData[$modulo];
                     $data = file_get_contents(str_ends_with_slash(Config::SKIN_RANDOM_COLLECTION_PATH) . $index->file) ?: throw new NeedRe_GenerateCache;
-                    $hash = $this->hash($data);
+                    $hash = Texture::digest($data);
                     if ($index->hash !== $hash) throw new NeedRe_GenerateCache;
                     return $data;
                 }
@@ -65,9 +66,5 @@ class IndexSkinRandomCollection
             } else throw new NeedRe_GenerateCache;
         }
         return null;
-    }
-    private function hash(string $data): string
-    {
-        return hash('sha256', $data);
     }
 }

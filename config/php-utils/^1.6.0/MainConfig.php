@@ -31,7 +31,7 @@ class MainConfig
     // Префикс БД для SERVERS
     public const string DB_PREFIX = 'server_';
     // Запись в файлы лога SQL запросов и их ошибок
-    public const bool DB_DEBUG = true;
+    public const bool DB_DEBUG = false;
     public const string|null BEARER_TOKEN = null;
     public const string PRIVATE_API_KEY = '';
     // https://base64.guru/converter/encode/file
@@ -42,15 +42,12 @@ class MainConfig
 
     /** @var array<string, array<string, mixed>> */
     public const array SERVERS = [];
-    /** @var array<string, array<string, string>> */
+    /** @var array<string, array<string, string|array<string, string>>> */
     public const array MODULES = [
         'LuckPerms' => [
             'DB_NAME' => 'LuckPerms',
             'prefix' => 'luckperms_',
         ],
-        /**
-         * EXECUTE, SELECT
-         */
         'TextureProvider' => [
             /** Driver Connect Database */
             'DB_NAME' => 'site',
@@ -63,7 +60,9 @@ class MainConfig
                  * 'user_id' for UserStorageTypeEnum::DB_USER_ID,
                  */
                 'id_column' => 'user_id',
-                'uuid_column' => 'uuid'
+                'username_column' => 'username',
+                'uuid_column' => 'uuid',
+                'email_column' => 'email',
             ],
             /**
              * For UserStorageTypeEnum::DB_SHA1
@@ -80,8 +79,8 @@ class MainConfig
                  */
                 'texture_type_column' => 'type',
                 'hash_column' => 'hash',
-                /** (NULL)|SLIM(1) */
-                'texture_meta_column' => 'meta'
+                /** NULL(int 0)|SLIM(int 1) */
+                'texture_meta_column' => 'meta',
             ],
         ],
     ];

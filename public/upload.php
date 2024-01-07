@@ -1,17 +1,11 @@
 <?php
-ini_set('error_reporting', E_ALL); // FULL DEBUG
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
 
-require sprintf('%s/vendor/autoload.php', __DIR__);
-
-use Microwin7\TextureLoader\Check;
+require sprintf('%s/../vendor/autoload.php', __DIR__);
 
 use Microwin7\PHPUtils\Utils\GDUtils;
 use Microwin7\PHPUtils\Utils\Texture;
-
-
 use Microwin7\TextureProvider\Config;
+use Microwin7\PHPUtils\DB\SubDBTypeEnum;
 use Microwin7\PHPUtils\Configs\MainConfig;
 use Microwin7\TextureProvider\Texture\Cape;
 use Microwin7\TextureProvider\Texture\Skin;
@@ -21,13 +15,11 @@ use Microwin7\PHPUtils\Response\JsonResponse;
 use Microwin7\TextureProvider\Utils\LuckPerms;
 use Microwin7\TextureProvider\Data\UserFromJWT;
 use Microwin7\PHPUtils\Exceptions\FileUploadException;
-use Microwin7\PHPUtils\Exceptions\TextureSizeException;
 use Microwin7\PHPUtils\Exceptions\TextureSizeHDException;
 use Microwin7\PHPUtils\Contracts\User\UserStorageTypeEnum;
 use Microwin7\TextureProvider\Request\Loader\RequestParams;
 use Microwin7\PHPUtils\Contracts\Texture\Enum\ResponseTypeEnum;
 use Microwin7\PHPUtils\Contracts\Texture\Enum\TextureStorageTypeEnum;
-use Microwin7\PHPUtils\DB\SubDBTypeEnum;
 
 // Registration ExceptionHandler
 new \Microwin7\PHPUtils\Exceptions\Handler\ExceptionHandler;
@@ -46,18 +38,14 @@ if (isset($_FILES['file'])) {
 		mkdir($texturePathStorage, 0666, true);
 	}
 	$file = $_FILES['file'];
-	try {
-		if ($file['error'] !== UPLOAD_ERR_OK || empty($file['tmp_name'])) throw new FileUploadException($file['error']);
-		if ($file['tmp_name'] == 'none' || !is_uploaded_file($file['tmp_name'])) throw new FileUploadException(9);
-	} catch (FileUploadException $e) {
-		JsonResponse::failed(error: $e->getMessage());
-	}
+	if ($file['error'] !== UPLOAD_ERR_OK || empty($file['tmp_name'])) throw new FileUploadException($file['error']);
+	if ($file['tmp_name'] == 'none' || !is_uploaded_file($file['tmp_name'])) throw new FileUploadException(9);
 
-	$tmp_name_info = getimagesize($file['tmp_name']);
-	if (!$tmp_name_info) JsonResponse::failed(error: 'Информация о файле не была прочитана');
-	($file['type'] != 'image/png' || $tmp_name_info[2] != IMAGETYPE_PNG) ? JsonResponse::failed(error: 'Выберите файл в формате .PNG!') : '';
-	($file['size'] <= TextureConfig::MAX_SIZE_BYTES) ?: JsonResponse::failed(error: 'Файл превышает размер 2МБ!');
 	$data = file_get_contents($file['tmp_name']);
+
+	(GDUtils::getImageMimeType($data) !== IMAGETYPE_PNG) ? JsonResponse::failed(error: 'Выберите файл в формате .PNG!') : '';
+	($file['size'] <= TextureConfig::MAX_SIZE_BYTES) ?: JsonResponse::failed(error: 'Файл превышает размер 2МБ!');
+
 	$image = imagecreatefromstring($data);
 	[$w, $h] = [imagesx($image), imagesy($image)];
 
@@ -66,11 +54,7 @@ if (isset($_FILES['file'])) {
 		if (Config::USE_LUCKPERMS_PERMISSION_HD_SKIN && (new LuckPerms($requestParams))->getUserWeight() < Config::MIN_WEIGHT)
 			JsonResponse::failed(error: 'У вас нет прав на установку плаща! Повысьте свою группу!');
 	} catch (TextureSizeHDException $e) {
-		try {
-			Texture::validateSize($w, $h, $requestParams->responseType->name);
-		} catch (TextureSizeException $e) {
-			JsonResponse::failed(error: $e->getMessage());
-		}
+		Texture::validateSize($w, $h, $requestParams->responseType->name);
 	}
 	$MODULE_ARRAY_DATA = MainConfig::MODULES['TextureProvider'];
 	$table_users = $MODULE_ARRAY_DATA['table_user']['TABLE_NAME'];
@@ -93,7 +77,7 @@ if (isset($_FILES['file'])) {
 			textureStorageType: $requestParams->textureStorageType,
 			data: $data,
 			url: (string) $requestParams,
-			isSlim: GDUtils::slim($data),
+			isSlim: GDUtils::checkSkinSlimFromImage($image),
 			digest: match (Config::USER_STORAGE_TYPE) {
 				UserStorageTypeEnum::DB_SHA1, UserStorageTypeEnum::DB_SHA256 => $requestParams->login,
 				default => null
