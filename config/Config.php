@@ -13,7 +13,7 @@ class Config
      * Если включён индекс файл index.php, ссылку можно указать как:
      * 'texture-provider/', тогда обязательно оставить / в конце
      */
-    public const string SCRIPT_URL = 'texture-provider/index.php';
+    public const string SCRIPT_URL = 'texture-provider/public/index.php';
 
     /**
      * Тип имени файлов для StorageType
@@ -30,7 +30,7 @@ class Config
      * Действует только на скины.
      * Приоритенее чем GIVE_DEFAULT_SKIN для скина
      */
-    public const bool GIVE_FROM_COLLECTION = true;
+    public const bool GIVE_FROM_COLLECTION = false;
     /**
      * При несоответсвтии хеш суммы файла в кеше,
      * либо при ненахождение файла из кеша в файловой системе,
@@ -53,7 +53,7 @@ class Config
     /**
      * Выдавать ли default плащи, если они не обнаружены в других источниках?
      */
-    public const bool GIVE_DEFAULT_CAPE = true;
+    public const bool GIVE_DEFAULT_CAPE = false;
 
     public const bool SKIN_RESIZE = true;  // Скины преобразовываются на лету, копируя руку и ногу, для новых форматов. Чинит работу HD скинов с оптифайном на 1.16.5 версии
     // Для 1.7.10 требуется SkinPort (https://github.com/RetroForge/SkinPort/releases)
