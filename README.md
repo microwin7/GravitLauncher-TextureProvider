@@ -92,10 +92,10 @@
     - **DB_SHA256** - [sha256.png] работает только с связью с БД
     - Настройка производиться в главном конфиге проекта: `config/texture-provider/Config.php`, константа **USER_STORAGE_TYPE**
     - Для **DB_USER_ID** используется таблица пользователей по UUID, настройка подключения к БД производиться в конфигурации библиотеки:
-      - `config/php-utils/^1.5.0/MainConfig.php` константа **MODULES['TextureProvider']**
+      - `config/php-utils/^1.6.0/MainConfig.php` константа **MODULES['TextureProvider']**
     - Для **DB_SHA1** и **DB_SHA256** используется таблица **`user_assets`**, поиск записей производиться по UUID.
       - Настройка подключения к БД производиться в конфигурации библиотеки:
-        - `config/php-utils/^1.5.0/MainConfig.php` константа **MODULES['TextureProvider']**
+        - `config/php-utils/^1.6.0/MainConfig.php` константа **MODULES['TextureProvider']**
       - Для реализации в вашем ЛК:
         - в поле **`uuid`** вы должны записать UUID пользователя
         - в поле **`name`** вы должны записать тип текстуры: **SKIN**, **CAPE**
@@ -135,12 +135,12 @@
 
 # Настройка
 ### Ссылка на скрипт
-- Протокол и `ДОМЕН`/`IP` `config/php-utils/^1.5.0/PathConfig.php` константа: **APP_URL**
-- Путь на файл **`index.php`** скрипта для запросов `config/php-utils/^1.5.0/MainConfig.php` константа: **SCRIPT_URL**
+- Протокол и `ДОМЕН`/`IP` `config/php-utils/^1.6.0/PathConfig.php` константа: **APP_URL**
+- Путь на файл **`index.php`** скрипта для запросов `config/php-utils/^1.6.0/MainConfig.php` константа: **SCRIPT_URL**
 ### Настройка пути корня до сайта
-- Путь до корня сайта в конфиге `config/php-utils/^1.5.0/PathConfig.php` константа: **ROOT_FOLDER**
+- Путь до корня сайта в конфиге `config/php-utils/^1.6.0/PathConfig.php` константа: **ROOT_FOLDER**
 ### Локальные хранилища скинов и плащей
-- Пути от корня сайта в конфиге `config/php-utils/^1.5.0/TextureConfig.php` константы: **SKIN_URL_PATH** и **CAPE_URL_PATH**
+- Пути от корня сайта в конфиге `config/php-utils/^1.6.0/TextureConfig.php` константы: **SKIN_URL_PATH** и **CAPE_URL_PATH**
 ### Настройка LaunchServer
 ```json
       "textureProvider": {
