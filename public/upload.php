@@ -60,9 +60,11 @@ if (isset($_FILES['file'])) {
 	$table_users = $MODULE_ARRAY_DATA['table_user']['TABLE_NAME'];
 	$user_id_column = $MODULE_ARRAY_DATA['table_user']['id_column'];
 	$user_uuid_column = $MODULE_ARRAY_DATA['table_user']['uuid_column'];
-	$user_id = SingletonConnector::get('TextureProvider')->query(<<<SQL
+	if (in_array(Config::USER_STORAGE_TYPE, [UserStorageTypeEnum::DB_USER_ID, UserStorageTypeEnum::DB_SHA1, UserStorageTypeEnum::DB_SHA256])) {
+		$user_id = SingletonConnector::get('TextureProvider')->query(<<<SQL
 		SELECT $user_id_column FROM $table_users WHERE $user_uuid_column IN (?)
 		SQL, "s", $requestParams->uuid)->value();
+	}
 	$requestParams->setVariable(
 		'login',
 		match (Config::USER_STORAGE_TYPE) {
@@ -93,8 +95,9 @@ if (isset($_FILES['file'])) {
 			}
 		)
 	};
-
-	if (move_uploaded_file($file['tmp_name'], Texture::getTexturePath($requestParams->login, $requestParams->responseType->name))) {
+	$filepath = Texture::getTexturePath($requestParams->login, $requestParams->responseType->name);
+	if (move_uploaded_file($file['tmp_name'], $filepath)) {
+		//chmod($filepath, 0664);
 		if (in_array(Config::USER_STORAGE_TYPE, [UserStorageTypeEnum::DB_SHA1, UserStorageTypeEnum::DB_SHA256])) {
 			$table_user_assets = $MODULE_ARRAY_DATA['table_user_assets']['TABLE_NAME'];
 
