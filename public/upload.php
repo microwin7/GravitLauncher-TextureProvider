@@ -1,7 +1,5 @@
 <?php
 
-require sprintf('%s/../vendor/autoload.php', __DIR__);
-
 use Microwin7\PHPUtils\Utils\GDUtils;
 use Microwin7\PHPUtils\Utils\Texture;
 use Microwin7\TextureProvider\Config;
@@ -20,6 +18,13 @@ use Microwin7\PHPUtils\Contracts\User\UserStorageTypeEnum;
 use Microwin7\TextureProvider\Request\Loader\RequestParams;
 use Microwin7\PHPUtils\Contracts\Texture\Enum\ResponseTypeEnum;
 use Microwin7\PHPUtils\Contracts\Texture\Enum\TextureStorageTypeEnum;
+
+// ini_set('error_reporting', E_ALL); // FULL DEBUG
+// ini_set('display_errors', 1);
+// ini_set('display_startup_errors', 1);
+
+require_once(__DIR__ . '/../vendor/autoload.php');
+// require_once(__DIR__ . '/../../texture-provider/vendor/autoload.php'); // Для выноса за пределы ROOT_FOLDER
 
 // Registration ExceptionHandler
 new \Microwin7\PHPUtils\Exceptions\Handler\ExceptionHandler;
