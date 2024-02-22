@@ -29,6 +29,7 @@ class TextureConfig
         'SKIN' => self::SKIN_PATH,
         'CAPE' => self::CAPE_PATH,
     ];
+    public const bool LEGACY_DIGEST = false; // Включить при необходимости! Использовать на версии GravitLauncher меньше 5.5.x
     /**
      * Максимальный размер загружаемого файла
      */

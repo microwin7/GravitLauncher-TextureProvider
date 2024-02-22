@@ -21,6 +21,7 @@ class CollectionType
     /** @psalm-suppress PropertyNotSetInConstructor */
     public readonly     bool                $skinSlim;
     public              null                $capeData = null;
+    public              string              $capeUrl = '';
 
     private IndexSkinRandomCollection       $index;
 

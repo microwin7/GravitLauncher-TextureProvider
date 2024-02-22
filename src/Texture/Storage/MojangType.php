@@ -25,7 +25,7 @@ class MojangType
     public  readonly    string  $skinUrl;
     public  readonly    bool    $skinSlim;
     public              ?string $capeData = null;
-    public  readonly    ?string $capeUrl;
+    public              string  $capeUrl = '';
 
     function __construct(
         public readonly string  $username,
@@ -38,11 +38,11 @@ class MojangType
                 !is_null($this->textures = $this->getTextures()) &&
                 ($skinAlreadyDetected === false || $capeAlreadyDetected === false)
             ) {
-                if (!is_null($this->skinUrl = $this->getSkinUrl()) && $skinAlreadyDetected === false) {
+                if ($skinAlreadyDetected === false && !is_null($this->skinUrl = $this->getSkinUrl())) {
                     $this->skinData = $this->getSkinData();
                     $this->skinSlim = $this->checkIsSlim();
                 }
-                if (!is_null($this->capeUrl = $this->getCapeUrl()) && $capeAlreadyDetected === false) {
+                if ($capeAlreadyDetected === false && !empty($this->capeUrl = $this->getCapeUrl())) {
                     $this->capeData = $this->getCapeData();
                 }
             }
@@ -132,12 +132,12 @@ class MojangType
         }
         return false;
     }
-    private function getCapeUrl(): ?string
+    private function getCapeUrl(): string
     {
         if (isset($this->textures->CAPE)) {
             return $this->textures->CAPE->url;
         }
-        return null;
+        return '';
     }
     private function getCapeData(): string
     {

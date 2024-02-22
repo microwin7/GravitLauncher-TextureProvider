@@ -17,7 +17,6 @@ class UserFromJWT
         if ($bearerToken === null) throw new RequiredArgumentMissingException('header BearerToken');
         $oOpenSSLAsymmetricKey = openssl_pkey_get_public(Main::getPublicKeyFromBase64());
         if (!$oOpenSSLAsymmetricKey) throw new \ValueError("Необходимо правильно настроить публичный ключ от вашего LaunchServer'а");
-        JWT::$leeway = 1000000;
         return JWT::decode(
             $bearerToken,
             new Key($oOpenSSLAsymmetricKey, 'ES256')

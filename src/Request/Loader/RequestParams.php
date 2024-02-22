@@ -19,15 +19,6 @@ final class RequestParams extends RequestParamsAbstract
     {
         $this->setOptions($_REQUEST)
             ->addEnum(ResponseTypeEnum::class);
-
-        if (!in_array($this->responseType, [ResponseTypeEnum::SKIN, ResponseTypeEnum::CAPE]))
-
-            throw new \ValueError(sprintf(
-                '%s может быть только: %s или %s',
-                ResponseTypeEnum::getNameRequestVariable(),
-                ResponseTypeEnum::SKIN->name,
-                ResponseTypeEnum::CAPE->name
-            ));
     }
     public function __toString(): string
     {

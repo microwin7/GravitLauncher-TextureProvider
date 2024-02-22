@@ -3,13 +3,14 @@
 namespace Microwin7\TextureProvider\Utils;
 
 use Microwin7\PHPUtils\DB\SingletonConnector;
-use Microwin7\TextureProvider\Request\Loader\RequestParams;
+use Microwin7\TextureProvider\Request\Provider\RequestParams;
+use Microwin7\TextureProvider\Request\Loader\RequestParams as LoaderRequestParams;
 
 class LuckPerms
 {
     private ?int $weight = null;
 
-    public function __construct(private RequestParams $requestParams)
+    public function __construct(private RequestParams|LoaderRequestParams $requestParams)
     {
         $this->getUserWeight();
     }

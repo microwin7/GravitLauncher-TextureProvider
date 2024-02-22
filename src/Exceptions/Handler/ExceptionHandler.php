@@ -2,7 +2,6 @@
 
 namespace Microwin7\PHPUtils\Exceptions\Handler;
 
-use Throwable;
 use Microwin7\PHPUtils\Configs\MainConfig;
 use Microwin7\PHPUtils\Response\JsonResponse;
 use Microwin7\PHPUtils\Exceptions\FileUploadException;
@@ -67,15 +66,14 @@ class ExceptionHandler
         ) {
             $this->error($e);
         }
-        if ($e instanceof Throwable) {
+        if ($e instanceof \Throwable) {
             if (MainConfig::SENTRY_ENABLE) \Sentry\captureException($e);
             $this->error($e);
         }
     }
-    /** @param interface-string<Throwable>|string $error */
-    private function error($error): never
+    private function error(\Throwable|string $error): never
     {
-        if ($error instanceof Throwable) {
+        if ($error instanceof \Throwable) {
             JsonResponse::failed(error: $error->getMessage());
         }
         JsonResponse::failed(error: $error);

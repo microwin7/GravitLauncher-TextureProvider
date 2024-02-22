@@ -59,7 +59,7 @@ class IndexSkinRandomCollection
                     return $data;
                 }
             }
-        } catch (NeedRe_GenerateCache $e) {
+        } catch (NeedRe_GenerateCache) {
             if (Config::MAX_RE_GENERATE_CACHE_COUNT > $this->countRe_Generate) {
                 $this->countRe_Generate++;
                 if ($this->generateIndex() > 0) $this->getDataFromUUID($uuid);

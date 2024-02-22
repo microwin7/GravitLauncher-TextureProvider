@@ -1,7 +1,7 @@
 # GravitLauncher-TextureProvider (JSON)
 
 ![PHP 8.3+](https://img.shields.io/badge/PHP-8.3+-blue)
-![Gravit Launcher](https://img.shields.io/badge/Gravit%20Launcher-v5.5.x+-brightgreen)
+![Gravit Launcher](https://img.shields.io/badge/Gravit%20Launcher-v5.2.9+-brightgreen)
 
 ✔ Выдача по USERNAME, UUID, (id пользователя, хеша sha1 и sha256) из БД.
 
@@ -35,7 +35,7 @@
 # Требования
 
 - PHP 8.3+
-- GravitLauncher 5.5.x+
+- GravitLauncher 5.2.9+
 - Расширение Multibyte String `php-mbstring`. Пример для PHP 8.3: `sudo apt-get install php8.3-mbstring`
 - Расширение GD `php-gd`. Пример для PHP 8.3: `sudo apt-get install php8.3-gd`
 - Расширения PDO при работе с БД:
@@ -158,6 +158,8 @@
         }
       },
 ```
+### Для включения поддержки версий 5.2.9-5.4.x
+- Включите изменение хеша на старые версии в `config/php-utils/^1.6.0/TextureConfig.php` константа: **LEGACY_DIGEST**
 
 ### Удаление чересстрочной развёртки. И сжатие
 Предупреждения:
