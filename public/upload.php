@@ -1,5 +1,7 @@
 <?php
 
+use GuzzleHttp\Psr7\ServerRequest;
+use Microwin7\TextureProvider\Config;
 use Microwin7\PHPUtils\Response\JsonResponse;
 use Microwin7\TextureProvider\Texture\Texture;
 use Microwin7\TextureProvider\Data\UserFromJWT;
@@ -28,7 +30,8 @@ if (isset($_FILES['file'])) {
 				->setVariable('username', $JWT_DATA->sub)
 				/** Variable uuid for other enum types in Config::USER_STORAGE_TYPE */
 				->setVariable('uuid', $JWT_DATA->uuid),
-			$_FILES['file']
+			ServerRequest::normalizeFiles($_FILES)['file'],
+			Config::HD_TEXTURES_ALLOW
 		)
 	);
 } else JsonResponse::failed(error: throw new FileUploadException(UPLOAD_ERR_NO_FILE));

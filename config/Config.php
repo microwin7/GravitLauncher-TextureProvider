@@ -13,8 +13,31 @@ class Config
      * Если включён индекс файл index.php, ссылку можно указать как:
      * 'texture-provider/', тогда обязательно оставить / в конце
      */
-    public const string SCRIPT_URL = 'texture-provider/public/index.php';
-
+    public const string SCRIPT_URL = 'texture-provider/';
+    /**
+     * Включение переопределения ссылок
+     * Пример:
+     * c: index.php?username=microwin7&uuid=973ae46f-897c-11ee-93f2-ac1f6bc5d1c6
+     * на: microwin7/973ae46f-897c-11ee-93f2-ac1f6bc5d1c6
+     * На данный момент все правила изменяются только через nginx
+     * Используйте конфигурацию location /texture-provider/ из README
+     */
+    public const bool ROUTERING = true;
+    /**
+     * Небольшое дополнение, преобразует отдаваемые ссылки
+     * Там где используется ENUM тип int, происходит переключение с имени Enum на значение
+     * Пример:
+     * с: texture-provider/SKIN/STORAGE/c6bddeda3e68acbb048f3961108a56bdb6b1397b0f56e72804f20b52ad19f5b8
+     * на: texture-provider/1/0/c6bddeda3e68acbb048f3961108a56bdb6b1397b0f56e72804f20b52ad19f5b8
+     * Служит только для укорачивания длины ссылки
+     */
+    public const bool MINIMIZE_ENUM_REQUEST = false;
+    /**
+     * Ширина и высота для аватара (два слоя головы)
+     * Если будут проблемы с HD скинами с шириной 1024, установить значение на 128
+     * Может быть null, будет использоваться значение BLOCK_CANVAS, а указание размера пропадёт из генерируемых ссылок
+     */
+    public const ?int AVATAR_CANVAS = null;
     /**
      * Тип имени файлов для StorageType
      * USERNAME - [username.png]
@@ -58,6 +81,11 @@ class Config
     public const bool SKIN_RESIZE = true;  // Скины преобразовываются на лету, копируя руку и ногу, для новых форматов. Чинит работу HD скинов с оптифайном на 1.16.5 версии
     // Для 1.7.10 требуется SkinPort (https://github.com/RetroForge/SkinPort/releases)
 
+    /**
+     * Разрешить загружать HD скины и плащи по умолчанию через API для лаунчера
+     * При включении USE_LUCKPERMS_PERMISSION_HD_SKIN - отключить
+     */
+    public const bool HD_TEXTURES_ALLOW = true;
     /**
      * Ограничение для загрузки HD скинов и плащей по правам LuckPerms
      * При использовании, обязательно настроить подключение к БД в MainConfig

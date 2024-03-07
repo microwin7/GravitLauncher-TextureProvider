@@ -27,7 +27,7 @@ class DefaultType
                     bool                $skinAlreadyDetected,
                     bool                $capeAlreadyDetected
     ) {
-        if ($skinAlreadyDetected === false && Config::GIVE_DEFAULT_SKIN && $responseType !== ResponseTypeEnum::CAPE) {
+        if ($skinAlreadyDetected === false && Config::GIVE_DEFAULT_SKIN && in_array($responseType, [ResponseTypeEnum::JSON, ResponseTypeEnum::SKIN, ResponseTypeEnum::AVATAR])) {
             if (!is_null($this->skinData = $this->getSkinData())) {
                 $this->skinResize();
                 if ($responseType === ResponseTypeEnum::SKIN) Texture::ResponseTexture($this->skinData);
@@ -35,7 +35,7 @@ class DefaultType
                 $this->skinSlim = $this->checkIsSlim();
             }
         }
-        if ($capeAlreadyDetected === false && Config::GIVE_DEFAULT_CAPE && $responseType !== ResponseTypeEnum::SKIN) {
+        if ($capeAlreadyDetected === false && Config::GIVE_DEFAULT_CAPE && in_array($responseType, [ResponseTypeEnum::JSON, ResponseTypeEnum::CAPE])) {
             if (!is_null($this->capeData = $this->getCapeData())) {
                 if ($responseType === ResponseTypeEnum::CAPE) Texture::ResponseTexture($this->capeData);
                 $this->capeUrl = $this->getCapeUrl();

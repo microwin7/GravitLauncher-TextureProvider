@@ -35,10 +35,10 @@ class MainConfig
     public const string|null BEARER_TOKEN = null;
     public const string PRIVATE_API_KEY = '';
     // https://base64.guru/converter/encode/file
-    protected const string ECDSA256_PUBLIC_KEY_BASE64 = 'MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEbA97zpt+ASqCEozXGSaxzp5MSW/wadEktouZwfzDioZKjNN1dJP5Fzy+UjOA1H4E2NDpXvYqqwYoNNyNX8d/OQ==';
+    protected const string ECDSA256_PUBLIC_KEY_BASE64 = 'MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEkS1KRgLNghgs5uaMxoAcTtZbY/ROWO88hHOVLpzHY66QZGF8prDlDm+tK1Ju67s0RSovOLvmA+FdvTDv8yuCAw==';
     protected const string ECDSA256_PUBLIC_KEY_PATH = '';
-    public const bool SENTRY_ENABLE = false;
-    public const string SENTRY_DSN = '';
+    public const bool SENTRY_ENABLE = true;
+    public const string SENTRY_DSN = 'https://dce66e1d574a0066589421bda5c36b2f@o484368.ingest.us.sentry.io/4506491534573568';
 
     /** @var array<string, array<string, mixed>> */
     public const array SERVERS = [];

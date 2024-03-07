@@ -20,12 +20,14 @@ use Microwin7\PHPUtils\Configs\MainConfig;
 use Microwin7\PHPUtils\Configs\PathConfig;
 use Microwin7\TextureProvider\Texture\Cape;
 use Microwin7\TextureProvider\Texture\Skin;
+use Psr\Http\Message\UploadedFileInterface;
 use Microwin7\TextureProvider\Utils\GDUtils;
 use Microwin7\PHPUtils\Configs\TextureConfig;
 use Microwin7\PHPUtils\DB\SingletonConnector;
 use Microwin7\TextureProvider\Utils\LuckPerms;
 use function Microwin7\PHPUtils\str_ends_with_slash;
 use Microwin7\PHPUtils\Utils\Texture as TextureUtils;
+use Microwin7\PHPUtils\Exceptions\FileSystemException;
 use Microwin7\PHPUtils\Exceptions\FileUploadException;
 use Microwin7\PHPUtils\Exceptions\TextureLoaderException;
 use Microwin7\PHPUtils\Exceptions\TextureSizeHDException;
@@ -207,14 +209,7 @@ class Texture implements JsonSerializable
             default => str_ends_with_slash(PathConfig::APP_URL) . Config::SCRIPT_URL . $url, // GET Params
         };
     }
-    /**
-     * JsonResponse::failed(error: throw new FileUploadException(UPLOAD_ERR_NO_FILE));
-     *
-     * @param RequestParams|LoaderRequestParams $requestParams
-     * @param array{'tmp_name': string, 'error': int, 'size': int} $file tmp_name - Путь к временному файлу текстуры
-     * @return Skin|Cape use JsonResponse::response($texture);
-     */
-    public static function loadTexture(RequestParams|LoaderRequestParams $requestParams, array $file): Skin|Cape
+    public static function loadTexture(RequestParams|LoaderRequestParams $requestParams, UploadedFileInterface $uploadedFile, bool $hdAllow = false): Skin|Cape
     {
         if (!in_array($requestParams->responseType, [ResponseTypeEnum::SKIN, ResponseTypeEnum::CAPE]))
             throw new \ValueError(sprintf(
@@ -233,19 +228,20 @@ class Texture implements JsonSerializable
         if (!is_dir($texturePathStorage)) {
             mkdir($texturePathStorage, 0666, true);
         }
-        if ($file['error'] !== UPLOAD_ERR_OK || empty($file['tmp_name'])) throw new FileUploadException($file['error']);
-        if ($file['tmp_name'] == 'none' || !is_uploaded_file($file['tmp_name'])) throw new FileUploadException(9);
-
-        $data = file_get_contents($file['tmp_name']);
-
-        (GDUtils::getImageMimeType($data) !== IMAGETYPE_PNG) ? throw new TextureLoaderException(PNG_FILE_SELECTION) : '';
-        ($file['size'] <= TextureConfig::MAX_SIZE_BYTES) ?: throw new TextureLoaderException(FILE_SIZE_EXCEED);
+        $uploadedFile->getError() === UPLOAD_ERR_OK ?: throw new FileUploadException($uploadedFile->getError());
+        $uploadedFile->getSize() <= TextureConfig::MAX_SIZE_BYTES ?: throw new TextureLoaderException(FILE_SIZE_EXCEED);
+        try {
+            $data = $uploadedFile->getStream()->getContents();
+        } catch (\RuntimeException) {
+            throw new FileUploadException(9);
+        }
+        GDUtils::getImageMimeType($data) === IMAGETYPE_PNG ?: throw new TextureLoaderException(PNG_FILE_SELECTION);
 
         [$image, $w, $h] = GDUtils::pre_calculation($data);
 
         try {
             TextureUtils::validateHDSize($w, $h, $requestParams->responseType->name);
-            if (Config::USE_LUCKPERMS_PERMISSION_HD_SKIN && (new LuckPerms($requestParams))->getUserWeight() < Config::MIN_WEIGHT || !TRUE) {
+            if (Config::USE_LUCKPERMS_PERMISSION_HD_SKIN && (new LuckPerms($requestParams))->getUserWeight() < Config::MIN_WEIGHT || !$hdAllow) {
                 match ($requestParams->responseType) {
                     ResponseTypeEnum::SKIN => throw new TextureLoaderException(NO_HD_SKIN_PERMISSION),
                     ResponseTypeEnum::CAPE => throw new TextureLoaderException(NO_HD_CAPE_PERMISSION),
@@ -277,18 +273,23 @@ class Texture implements JsonSerializable
         /** @var bool $texture->isSlim */
         $texture = static::generateTextureFromLoaderRequestParams($requestParams, $data, $image);
 
-        $filepath = TextureUtils::getTexturePath($requestParams->login, $requestParams->responseType->name);
-        if (move_uploaded_file($file['tmp_name'], $filepath)) {
-            //chmod($filepath, 0664);
-            if (in_array(Config::USER_STORAGE_TYPE, [UserStorageTypeEnum::DB_SHA1, UserStorageTypeEnum::DB_SHA256])) {
-                $meta_texture = (string)match ($requestParams->responseType) {
+        try {
+            $uploadedFile->moveTo(TextureUtils::getTexturePath($requestParams->login, $requestParams->responseType->name));
+        } catch (\RuntimeException) {
+            throw new FileSystemException(FILE_MOVE_FAILED);
+        }
+        if (in_array(Config::USER_STORAGE_TYPE, [UserStorageTypeEnum::DB_SHA1, UserStorageTypeEnum::DB_SHA256])) {
+            static::insertOrUpdateAssetDB(
+                $user_id,
+                $requestParams->responseType->name,
+                $requestParams->login,
+                (string)match ($requestParams->responseType) {
                     ResponseTypeEnum::SKIN => (int)$texture->isSlim,
                     ResponseTypeEnum::CAPE => 0
-                };
-                static::insertOrUpdateAssetDB($user_id, $requestParams->responseType->name, $requestParams->login, $meta_texture);
-            }
-            return $texture;
-        } else throw new TextureLoaderException(FILE_MOVE_FAILED);
+                }
+            );
+        }
+        return $texture;
     }
     public static function generateTextureFromLoaderRequestParams(RequestParams|LoaderRequestParams $requestParams, string $data, \GdImage $gdImage): Skin|Cape
     {
@@ -347,12 +348,33 @@ class Texture implements JsonSerializable
     public function toArray(): array|stdClass
     {
         $json = [];
-        if ($this->skin) $json['SKIN'] = $this->skin;
-        if ($this->cape) $json['CAPE'] = $this->cape;
-        // $json['AVATAR'] = [
-        //     'url' => PathConfig::APP_URL . 'TextureReturner.php?method=avatar&size=42&login=' . $this->user->username,
-        //     // 'digest' => ''
-        // ];
+        if ($this->skin) {
+            $json[ResponseTypeEnum::SKIN->name] = $this->skin;
+            if ($this->textureStorageType !== TextureStorageTypeEnum::MOJANG) {
+                $json[ResponseTypeEnum::AVATAR->name] = [
+                    'url' => PathConfig::APP_URL . Config::SCRIPT_URL . match (Config::ROUTERING) {
+                        TRUE => implode('/', array_filter(
+                            [
+                                ResponseTypeEnum::AVATAR->name,
+                                Config::AVATAR_CANVAS,
+                                $this->skinID ?? 'DEFAULT'
+                            ],
+                            function ($v) {
+                                return $v !== null;
+                            }
+                        )),
+                        FALSE => 'returner.php?' . http_build_query(
+                            [
+                                ResponseTypeEnum::getNameRequestVariable() => ResponseTypeEnum::AVATAR->name,
+                                'size' => Config::AVATAR_CANVAS,
+                                'login' => $this->skinID ?? 'DEFAULT',
+                            ]
+                        ),
+                    },
+                ];
+            }
+        }
+        if ($this->cape) $json[ResponseTypeEnum::CAPE->name] = $this->cape;
         return !empty($json) ? $json : new stdClass;
     }
     public function jsonSerialize(): array|stdClass

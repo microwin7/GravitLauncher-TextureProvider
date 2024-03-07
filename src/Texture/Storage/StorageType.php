@@ -33,15 +33,17 @@ class StorageType
                         ResponseTypeEnum    $responseType
     ) {
         $this->fileSystem = new FileSystem;
-        if ($this->skinID !== null && $responseType !== ResponseTypeEnum::CAPE) {
+        if ($this->skinID !== null && in_array($responseType, [ResponseTypeEnum::JSON, ResponseTypeEnum::SKIN, ResponseTypeEnum::AVATAR])) {
             if (!is_null($this->skinData = $this->getSkinData())) {
-                $this->skinResize();
+                if ($responseType !== ResponseTypeEnum::AVATAR) $this->skinResize();
                 if ($responseType === ResponseTypeEnum::SKIN) Texture::ResponseTexture($this->skinData);
-                $this->skinUrl = $this->getSkinUrl();
-                $this->skinSlim = $this->checkIsSlim();
+                if ($responseType !== ResponseTypeEnum::AVATAR) {
+                    $this->skinUrl = $this->getSkinUrl($responseType);
+                    $this->skinSlim = $this->checkIsSlim();
+                }
             }
         }
-        if ($this->capeID !== null && $responseType !== ResponseTypeEnum::SKIN) {
+        if ($this->capeID !== null && in_array($responseType, [ResponseTypeEnum::JSON, ResponseTypeEnum::CAPE])) {
             if (!is_null($this->capeData = $this->getCapeData())) {
                 if ($responseType === ResponseTypeEnum::CAPE) Texture::ResponseTexture($this->capeData);
                 $this->capeUrl = $this->getCapeUrl();
@@ -53,7 +55,7 @@ class StorageType
         if (Config::USER_STORAGE_TYPE === UserStorageTypeEnum::USERNAME) {
             if (!$this->fileSystem->is_file($skinPath = UtilsTexture::getSkinPath($this->skinID))) {
                 $username = $this->fileSystem->findFile(UtilsTexture::getSkinPathStorage(), $this->skinID, TextureConfig::EXT);
-                if ($username) {
+                if ($username !== null) {
                     return file_get_contents(UtilsTexture::getSkinPath($this->skinID = $username));
                 } else {
                     return null;
@@ -79,11 +81,11 @@ class StorageType
             }
         }
     }
-    private function getSkinUrl(): string
+    private function getSkinUrl(ResponseTypeEnum $responseType): string
     {
         $requestParams = new RequestParams;
         $requestParams
-            ->withEnum(ResponseTypeEnum::SKIN)
+            ->withEnum($responseType === ResponseTypeEnum::JSON ? ResponseTypeEnum::SKIN : $responseType)
             ->withEnum(TextureStorageTypeEnum::STORAGE)
             ->setVariable('login', $this->skinID);
         return (string)$requestParams;
@@ -106,10 +108,10 @@ class StorageType
         if (Config::USER_STORAGE_TYPE === UserStorageTypeEnum::USERNAME) {
             if (!$this->fileSystem->is_file($capePath = UtilsTexture::getCapePath($this->capeID))) {
                 $username = $this->fileSystem->findFile(UtilsTexture::getCapePathStorage(), $this->capeID, TextureConfig::EXT);
-                if ($username) {
+                if ($username !== null) {
                     return file_get_contents(UtilsTexture::getCapePath($this->capeID = $username));
                 } else {
-                    return null;
+                    return $username;
                 }
             } else return file_get_contents($capePath);
         } else {

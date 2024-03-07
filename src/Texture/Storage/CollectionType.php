@@ -39,7 +39,7 @@ class CollectionType
     }
     private function getSkinData(): ?string
     {
-        return $this->index->getDataFromUUID($this->uuid) ?: null;
+        return $this->index->getDataFromUUID($this->uuid);
     }
     private function skinResize(): void
     {

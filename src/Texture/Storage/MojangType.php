@@ -46,7 +46,7 @@ class MojangType
                     $this->capeData = $this->getCapeData();
                 }
             }
-        } catch (UserNotFoundException | \RuntimeException $ignored) {
+        } catch (UserNotFoundException | \RuntimeException) {
         }
     }
     /** 

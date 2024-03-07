@@ -19,7 +19,7 @@ class LuckPerms
         if ($this->weight === null) {
             $this->weight = 0;
             /** @var object{uuid: string, server: string, name: string, displayname: string, weight: int, expiry: int, date: string} */
-            foreach (SingletonConnector::get()->query(
+            foreach (SingletonConnector::get('LuckPerms')->query(
                 <<<SQL
             SELECT LP_USER.uuid, LP_USER.server, LP_USER.name, LP_USER.displayname, LP_USER.weight, LP_USER.expiry, LP_USER.date 
             FROM (SELECT uuid FROM luckperms_players WHERE username = ?) as LP_PLAYERS
