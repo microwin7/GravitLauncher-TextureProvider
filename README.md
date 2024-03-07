@@ -143,14 +143,14 @@
 - Пути от корня сайта в конфиге `config/php-utils/^1.6.0/TextureConfig.php` константы: **SKIN_URL_PATH** и **CAPE_URL_PATH**
 ### Настройка NGINX
 ```nginx
-	location /texture-provider/ {
+    location /texture-provider/ {
         rewrite "^(/texture-provider)/(\w{2,16})/([0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12})$" $1/index.php?username=$2&uuid=$3 last;
         rewrite "^(/texture-provider)/(MOJANG|1|HYBRID|2)/(\w{2,16})/([0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12})$" $1/index.php?method=$2&username=$3&uuid=$4 last;
         rewrite "^(/texture-provider)/(SKIN|1|CAPE|2)/(STORAGE|0|COLLECTION|2)/([0-9]+|\w{2,16}|[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}|[0-9a-f]{32}|[0-9a-f]{40}|[0-9a-f]{64})$" $1/index.php?type=$2&storage=$3&login=$4 last;
         rewrite "^(/texture-provider)/(SKIN|1|CAPE|2)/(DEFAULT|3)$" $1/index.php?type=$2&storage=$3 last;
         rewrite "^(/texture-provider)/upload/(SKIN|1|CAPE|2)$" $1/upload.php?type=$2 last;
-		rewrite "^(/texture-provider)/(AVATAR)/([0-9]{2,3})/([0-9]+|\w{2,16}|[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}|[0-9a-f]{32}|[0-9a-f]{40}|[0-9a-f]{64})$" $1/returner.php?type=$2&size=$3&login=$4 last;
-		rewrite "^(/texture-provider)/(AVATAR)/([0-9]+|\w{2,16}|[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}|[0-9a-f]{32}|[0-9a-f]{40}|[0-9a-f]{64})$" $1/returner.php?type=$2&login=$3 last;
+        rewrite "^(/texture-provider)/(AVATAR)/([0-9]{2,3})/([0-9]+|\w{2,16}|[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}|[0-9a-f]{32}|[0-9a-f]{40}|[0-9a-f]{64})$" $1/returner.php?type=$2&size=$3&login=$4 last;
+        rewrite "^(/texture-provider)/(AVATAR)/([0-9]+|\w{2,16}|[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}|[0-9a-f]{32}|[0-9a-f]{40}|[0-9a-f]{64})$" $1/returner.php?type=$2&login=$3 last;
         alias /var/www/texture-provider/public/;
         location ~ \.php$ {
             fastcgi_pass unix:/run/php/php8.3-fpm.sock;
