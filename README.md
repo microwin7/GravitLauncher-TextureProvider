@@ -165,14 +165,14 @@
 ### Настройка LaunchServer
 ```json
       "textureProvider": {
-        "url": "http://127.0.0.1/texture-provider/index.php?username=%username%&uuid=%uuid%",
+        "url": "http://127.0.0.1/texture-provider/%username%/%uuid%",
         "type": "json"
       },
       "mixes": {
         "textureLoader": {
           "urls": {
-            "SKIN": "http://127.0.0.1/texture-provider/upload.php?type=SKIN",
-            "CAPE": "http://127.0.0.1/texture-provider/upload.php?type=CAPE"
+            "SKIN": "http://127.0.0.1/texture-provider/upload/SKIN",
+            "CAPE": "http://127.0.0.1/texture-provider/upload/CAPE"
           },
           "slimSupportConf": "SERVER",
           "type": "uploadAsset"
