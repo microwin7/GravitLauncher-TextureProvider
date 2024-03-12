@@ -40,7 +40,7 @@ class Constants
 
     public static function getSkin(string|null $login)
     {
-        $storageType = new StorageType($login, null, ResponseTypeEnum::AVATAR);
+        $storageType = new StorageType($login, null, null, ResponseTypeEnum::AVATAR);
         if (!is_null($storageType->skinData)) return $storageType->skinData;
         $storageType = new DefaultType(ResponseTypeEnum::AVATAR, false, true);
         if (!is_null($storageType->skinData)) return $storageType->skinData;

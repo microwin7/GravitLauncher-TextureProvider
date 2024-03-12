@@ -48,6 +48,7 @@ class Texture implements JsonSerializable
     public              ?Skin                       $skin = null;
     public              ?Cape                       $cape = null;
     public              ?string                     $skinID = null;
+    public              ?true                       $isSlim = null;
     public              ?string                     $capeID = null;
 
     private             TextureStorageTypeEnum      $textureStorageType;
@@ -109,7 +110,7 @@ class Texture implements JsonSerializable
 
     private function storage(): void
     {
-        $this->setTextures(new StorageType($this->skinID, $this->capeID, $this->user->responseType));
+        $this->setTextures(new StorageType($this->skinID, $this->isSlim, $this->capeID, $this->user->responseType));
     }
     private function mojang(): void
     {
@@ -195,7 +196,7 @@ class Texture implements JsonSerializable
         foreach ($result as $v) {
             if (ResponseTypeEnum::SKIN === ResponseTypeEnum::tryFromString($v[$texture_type_column])) {
                 $skinID = $v[$hash_column];
-                // Need Add meta
+                if ($v[$texture_meta_column] === 'SLIM') $this->isSlim = true;
             }
             if (ResponseTypeEnum::CAPE === ResponseTypeEnum::tryFromString($v[$texture_type_column]))
                 $capeID = $v[$hash_column];

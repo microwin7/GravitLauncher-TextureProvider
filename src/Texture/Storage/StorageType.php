@@ -29,6 +29,7 @@ class StorageType
 
     function __construct(
         public          ?string             $skinID,
+        public          ?true               $isSlim,
         public          ?string             $capeID,
                         ResponseTypeEnum    $responseType
     ) {
@@ -92,6 +93,7 @@ class StorageType
     }
     private function checkIsSlim(): bool
     {
+        if ($this->isSlim) return $this->isSlim;
         try {
             return GDUtils::slim($this->skinData);
         } catch (TypeError $e) {
