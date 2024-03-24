@@ -10,6 +10,7 @@ use Microwin7\PHPUtils\Contracts\Texture\Enum\TextureStorageTypeEnum;
 
 final class User
 {
+    private static ?User $instance = null;
     /**
      * Типы возможных запрашиваемых данных:
      * JSON
@@ -58,6 +59,31 @@ final class User
         /** @var MethodTypeEnum */
         $this->methodType = $requestParams->methodType;
         $this->validParams();
+    }
+    public static function getInstance(): static
+    {
+        if (static::$instance === null) {
+            throw new \Exception('Singleton instance has not been initialized.');
+        }
+        return static::$instance;
+    }
+    public static function initialize(string $username, string $uuid, ResponseTypeEnum $responseTypeEnum = ResponseTypeEnum::JSON): void
+    {
+        if (static::$instance === null) {
+            static::newInstance($username, $uuid, $responseTypeEnum);
+        } else {
+            throw new \Exception('Singleton instance has already been initialized.');
+        }
+    }
+    public static function newInstance(string $username, string $uuid, ResponseTypeEnum $responseTypeEnum = ResponseTypeEnum::JSON): static
+    {
+        return static::$instance = new static((new RequestParams)
+            ->withEnum($responseTypeEnum)
+            ->withEnum(TextureStorageTypeEnum::getDefault())
+            ->withEnum(MethodTypeEnum::getDefault())
+            ->setVariable('login', null)
+            ->setVariable('username', $username)
+            ->setVariable('uuid', $uuid));
     }
     /** Вызов валидатора, в зависимости от типа получаемых данных */
     private function validParams(): void

@@ -187,7 +187,7 @@ class Texture implements JsonSerializable
 
         /** @var list<array<string, string>> $result */
         $result = SingletonConnector::get('TextureProvider')->query(<<<SQL
-            SELECT $texture_type_column , $hash_column, $texture_meta_column
+            SELECT ASSETS.$texture_type_column, ASSETS.$hash_column, ASSETS.$texture_meta_column
             FROM $table_user_assets as ASSETS
             INNER JOIN $table_users as USERS
             ON ASSETS.$assets_id_column = USERS.$user_id_column
@@ -227,7 +227,7 @@ class Texture implements JsonSerializable
          */
         $texturePathStorage = TextureUtils::getTexturePathStorage($requestParams->responseType->name);
         if (!is_dir($texturePathStorage)) {
-            mkdir($texturePathStorage, 0666, true);
+            mkdir($texturePathStorage, 0755, true);
         }
         $uploadedFile->getError() === UPLOAD_ERR_OK ?: throw new FileUploadException($uploadedFile->getError());
         $uploadedFile->getSize() <= TextureConfig::MAX_SIZE_BYTES ?: throw new TextureLoaderException(FILE_SIZE_EXCEED);
@@ -276,8 +276,8 @@ class Texture implements JsonSerializable
 
         try {
             $uploadedFile->moveTo(TextureUtils::getTexturePath($requestParams->login, $requestParams->responseType->name));
-        } catch (\RuntimeException) {
-            throw new FileSystemException(FILE_MOVE_FAILED);
+        } catch (\RuntimeException $e) {
+            throw new FileSystemException(FILE_MOVE_FAILED . $e->getMessage());
         }
         if (in_array(Config::USER_STORAGE_TYPE, [UserStorageTypeEnum::DB_SHA1, UserStorageTypeEnum::DB_SHA256])) {
             static::insertOrUpdateAssetDB(
