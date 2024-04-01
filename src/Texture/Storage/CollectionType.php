@@ -31,8 +31,10 @@ class CollectionType
     ) {
         $this->index = new IndexSkinRandomCollection;
         if (!is_null($this->skinData = $this->getSkinData())) {
-            $this->skinResize();
-            if ($responseType === ResponseTypeEnum::SKIN) Texture::ResponseTexture($this->skinData);
+            if ($responseType === ResponseTypeEnum::SKIN) {
+                $this->skinResize();
+                Texture::ResponseTexture($this->skinData);
+            }
             $this->skinUrl = $this->getSkinUrl();
             $this->skinSlim = $this->checkIsSlim();
         }

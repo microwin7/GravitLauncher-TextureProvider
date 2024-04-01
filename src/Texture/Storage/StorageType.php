@@ -36,8 +36,10 @@ class StorageType
         $this->fileSystem = new FileSystem;
         if ($this->skinID !== null && in_array($responseType, [ResponseTypeEnum::JSON, ResponseTypeEnum::SKIN, ResponseTypeEnum::AVATAR])) {
             if (!is_null($this->skinData = $this->getSkinData())) {
-                if ($responseType !== ResponseTypeEnum::AVATAR) $this->skinResize();
-                if ($responseType === ResponseTypeEnum::SKIN) Texture::ResponseTexture($this->skinData);
+                if ($responseType === ResponseTypeEnum::SKIN) {
+                    $this->skinResize();
+                    Texture::ResponseTexture($this->skinData);
+                } 
                 if ($responseType !== ResponseTypeEnum::AVATAR) {
                     $this->skinUrl = $this->getSkinUrl($responseType);
                     $this->skinSlim = $this->checkIsSlim();

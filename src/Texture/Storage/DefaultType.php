@@ -29,8 +29,10 @@ class DefaultType
     ) {
         if ($skinAlreadyDetected === false && Config::GIVE_DEFAULT_SKIN && in_array($responseType, [ResponseTypeEnum::JSON, ResponseTypeEnum::SKIN, ResponseTypeEnum::AVATAR])) {
             if (!is_null($this->skinData = $this->getSkinData())) {
-                $this->skinResize();
-                if ($responseType === ResponseTypeEnum::SKIN) Texture::ResponseTexture($this->skinData);
+                if ($responseType === ResponseTypeEnum::SKIN) {
+                    $this->skinResize();
+                    Texture::ResponseTexture($this->skinData);
+                }
                 $this->skinUrl = $this->getSkinUrl();
                 $this->skinSlim = $this->checkIsSlim();
             }
