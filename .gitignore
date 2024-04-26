@@ -1,4 +1,7 @@
-/cache/
+cache/*
+!cache/.gitkeep
+storage/*
+!storage/.gitkeep
 /vendor/
 # Psalm
 log.txt

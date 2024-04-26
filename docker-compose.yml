@@ -9,3 +9,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.php-fpm
+    volumes:
+      - ./cache:/var/www/html/cache
+      - ./storage:/var/www/html/storage
