@@ -46,7 +46,7 @@ class Config
      * DB_SHA1 - [sha1.png] работает только с связью с БД
      * DB_SHA256 - [sha256.png] работает только с связью с БД
      */
-    public const UserStorageTypeEnum USER_STORAGE_TYPE = UserStorageTypeEnum::DB_SHA256;
+    public const UserStorageTypeEnum USER_STORAGE_TYPE = UserStorageTypeEnum::UUID;
 
     /**
      * Выдавать ли рандомный скин из коллекции?
