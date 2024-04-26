@@ -9,3 +9,5 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.php-fpm
+    volumes:
+      - ./storage:/app/storage
