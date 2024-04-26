@@ -1,2 +1,5 @@
-/cache/
-/storage/
+.git
+.vscode
+cache
+storage
+sql
