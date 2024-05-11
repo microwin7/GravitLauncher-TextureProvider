@@ -27,6 +27,24 @@ final class RequestParams extends RequestParamsAbstract
             ->addVariable('uuid', Regex::UUIDv1_AND_v4, true)
             ->addEnum(MethodTypeEnum::class, true);
     }
+    public static function fromRoute(array $vars): static
+    {
+        return (new static())->setOptions($vars)
+            ->addEnum(ResponseTypeEnum::class, true)
+            ->addEnum(TextureStorageTypeEnum::class, true)
+            ->addVariable('login', Regex::combineOR(Regex::NUMERIC_REGXP, Regex::USERNAME, Regex::UUIDv1_AND_v4, Regex::MD5, Regex::SHA1, Regex::SHA256), true)
+            ->addVariable('username', Regex::USERNAME, true)
+            ->addVariable('uuid', Regex::UUIDv1_AND_v4, true)
+            ->addEnum(MethodTypeEnum::class, true);
+    }
+    public static function fromRouteReturner(array $vars): static
+    {
+        return (new static())->setOptions($vars)
+            ->addEnum(ResponseTypeEnum::class, false)
+            ->addVariable('login', Regex::combineOR(Regex::NUMERIC_REGXP, Regex::USERNAME, Regex::UUIDv1_AND_v4, Regex::MD5, Regex::SHA1, Regex::SHA256), false)
+            ->addVariable('size', Regex::NUMERIC_REGXP, true)
+            ->addEnum(MethodTypeEnum::class, true);
+    }
     public function __toString(): string
     {
         /**
@@ -34,11 +52,11 @@ final class RequestParams extends RequestParamsAbstract
          * @var TextureStorageTypeEnum::STORAGE|TextureStorageTypeEnum::COLLECTION|TextureStorageTypeEnum::DEFAULT $this->textureStorageType
          * @var string|null $this->login null while TextureStorageTypeEnum::DEFAULT
          */
-        return match (Config::ROUTERING) {
+        return match (Config::ROUTERING()) {
             TRUE => implode('/', array_filter(
                 [
-                    Config::MINIMIZE_ENUM_REQUEST ? (string)$this->responseType->value : $this->responseType->name,
-                    Config::MINIMIZE_ENUM_REQUEST ? (string)$this->textureStorageType->value : $this->textureStorageType->name,
+                    Config::MINIMIZE_ENUM_REQUEST() ? (string)$this->responseType->value : $this->responseType->name,
+                    Config::MINIMIZE_ENUM_REQUEST() ? (string)$this->textureStorageType->value : $this->textureStorageType->name,
                     $this->login
                 ],
                 function ($v) {
@@ -47,8 +65,8 @@ final class RequestParams extends RequestParamsAbstract
             )),
             FALSE => 'index.php?' . http_build_query(
                 [
-                    ResponseTypeEnum::getNameRequestVariable() => Config::MINIMIZE_ENUM_REQUEST ? (string)$this->responseType->value : $this->responseType->name,
-                    TextureStorageTypeEnum::getNameRequestVariable() => Config::MINIMIZE_ENUM_REQUEST ? (string)$this->textureStorageType->value : $this->textureStorageType->name,
+                    ResponseTypeEnum::getNameRequestVariable() => Config::MINIMIZE_ENUM_REQUEST() ? (string)$this->responseType->value : $this->responseType->name,
+                    TextureStorageTypeEnum::getNameRequestVariable() => Config::MINIMIZE_ENUM_REQUEST() ? (string)$this->textureStorageType->value : $this->textureStorageType->name,
                     'login' => $this->login,
                 ]
             )

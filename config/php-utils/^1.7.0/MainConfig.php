@@ -2,43 +2,12 @@
 
 namespace Microwin7\PHPUtils\Configs;
 
-use Microwin7\PHPUtils\DB\DriverTypeEnum;
-use Microwin7\PHPUtils\DB\SubDBTypeEnum;
-
 class MainConfig
 {
-    // Подключение к БД сайта
-    public const string DB_HOST = 'localhost';
-    public const string DB_NAME = 'test';
-    public const string DB_USER = 'test';
-    public const string DB_PASS = 'test';
-    public const string DB_PORT = '3306';
-    /**
-     * DriverTypeEnum::PDO [SubDBTypeEnum::MySQL, SubDBTypeEnum::PostgreSQL]
-     * DriverTypeEnum::MySQLi [SubDBTypeEnum::MySQL]
-     */
-    public const DriverTypeEnum DB_DRIVER = DriverTypeEnum::PDO; // MySQLi, PDO | Default: MySQLi
-    /**
-     * DSN префикс Sub DB для PDO
-     * SubDBTypeEnum::MySQL
-     * SubDBTypeEnum::PostgreSQL
-     */
-    public const SubDBTypeEnum DB_SUD_DB = SubDBTypeEnum::MySQL;
     public const array DB_PDO_OPTIONS = [
         \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
         \PDO::ATTR_PERSISTENT => true
     ];
-    // Префикс БД для SERVERS
-    public const string DB_PREFIX = 'server_';
-    // Запись в файлы лога SQL запросов и их ошибок
-    public const bool DB_DEBUG = false;
-    public const string|null BEARER_TOKEN = null;
-    public const string PRIVATE_API_KEY = '';
-    // https://base64.guru/converter/encode/file
-    protected const string ECDSA256_PUBLIC_KEY_BASE64 = 'MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEkS1KRgLNghgs5uaMxoAcTtZbY/ROWO88hHOVLpzHY66QZGF8prDlDm+tK1Ju67s0RSovOLvmA+FdvTDv8yuCAw==';
-    protected const string ECDSA256_PUBLIC_KEY_PATH = '';
-    public const bool SENTRY_ENABLE = true;
-    public const string SENTRY_DSN = 'https://dce66e1d574a0066589421bda5c36b2f@o484368.ingest.us.sentry.io/4506491534573568';
 
     /** @var array<string, array<string, mixed>> */
     public const array SERVERS = [];
@@ -47,6 +16,10 @@ class MainConfig
         'LuckPerms' => [
             'DB_NAME' => 'LuckPerms',
             'prefix' => 'luckperms_',
+        ],
+        'LiteBans' => [
+            'DB_NAME' => 'LiteBans',
+            'prefix' => 'litebans_',
         ],
         'TextureProvider' => [
             /** Driver Connect Database */

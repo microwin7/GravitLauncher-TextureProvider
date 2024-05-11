@@ -54,7 +54,7 @@ class MojangType
      */
     private function getUUID(): string
     {
-        if ($userProfile = Data::getDataFromUrl('https://api.mojang.com/users/profiles/minecraft/' . $this->username)) {
+        if (($userProfile = Data::getDataFromUrl('https://api.mojang.com/users/profiles/minecraft/' . $this->username)) !== false) {
             /** @var object{id: string, name: string} */
             $decodeData = json_decode($userProfile);
             return $decodeData->id;
@@ -75,7 +75,7 @@ class MojangType
      */
     private function getTextures(): object
     {
-        if ($profile = Data::getDataFromUrl('https://sessionserver.mojang.com/session/minecraft/profile/' . $this->uuid)) {
+        if (($profile = Data::getDataFromUrl('https://sessionserver.mojang.com/session/minecraft/profile/' . $this->uuid)) !== false) {
             /** @var object{
              *  id: string,
              *  name: string,
@@ -121,7 +121,7 @@ class MojangType
     private function getSkinData(): string
     {
         $skinData = Data::getDataFromUrl($this->skinUrl);
-        if ($skinData) return $skinData;
+        if ($skinData !== false) return $skinData;
         throw new \RuntimeException;
     }
     private function checkIsSlim(): bool
@@ -142,7 +142,7 @@ class MojangType
     private function getCapeData(): string
     {
         $capeData = Data::getDataFromUrl($this->capeUrl);
-        if ($capeData) return $capeData;
+        if ($capeData !== false) return $capeData;
         throw new \RuntimeException;
     }
 }

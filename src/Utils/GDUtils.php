@@ -2,6 +2,7 @@
 
 namespace Microwin7\TextureProvider\Utils;
 
+use GdImage;
 use Microwin7\PHPUtils\Utils\GDUtils as UtilsGDUtils;
 use Microwin7\TextureProvider\Config;
 
@@ -9,7 +10,7 @@ class GDUtils extends UtilsGDUtils
 {
     public static function skin_resize(string $data): string
     {
-        if (Config::SKIN_RESIZE) {
+        if (Config::SKIN_RESIZE()) {
             [$image, $x, $y, $fraction] = self::pre_calculation($data);
             if ($x / 2 == $y) {
                 $canvas = self::create_canvas_transparent($x, $x);
@@ -58,5 +59,122 @@ class GDUtils extends UtilsGDUtils
             }
         }
         return $data;
+    }
+    /**
+     * @param array{0: GdImage, 1: int} $data
+     */
+    public static function front(array $data, int $size): GdImage
+    {
+        // Создано пока что только для скинов по шаблону 64x32
+        [$image, $fraction] = $data;
+        $canvas = parent::create_canvas_transparent($size, $size * 2);
+        /** @var int $f_part */
+        $f_part = $fraction / 2;
+        $canvas_front = GDUtils::create_canvas_transparent($fraction * 2, $fraction * 4);
+        $canvas_arm = GDUtils::create_canvas_transparent($f_part, $f_part * 3);
+        $canvas_leg = $canvas_arm;
+        // Head
+        imagecopy($canvas_front, $image, $f_part, 0, $fraction, $fraction, $fraction, $fraction);
+        //Helmet
+        imagecopy($canvas_front, $image, $f_part, 0, $fraction * 5, $fraction, $fraction, $fraction);
+        // Torso
+        imagecopy($canvas_front, $image, $f_part, $f_part * 2, $f_part * 5, $f_part * 5, $f_part * 2, $f_part * 3);
+        //Left Arm
+        imagecopy($canvas_arm, $image, 0, 0, $f_part * 11, $f_part * 5, $f_part, $f_part * 3);
+        imagecopy($canvas_front, $canvas_arm, 0, $f_part * 2, 0, 0, $f_part, $f_part * 3);
+        //Right Arm
+        imageflip($canvas_arm, IMG_FLIP_HORIZONTAL);
+        imagecopy($canvas_front, $canvas_arm, $f_part * 3, $f_part * 2, 0, 0, $f_part, $f_part * 3);
+        //Left Leg
+        imagecopy($canvas_leg, $image, 0, 0, $f_part, $f_part * 5, $f_part, $f_part * 3);
+        imagecopy($canvas_front, $canvas_leg, $f_part, $f_part * 5, 0, 0, $f_part, $f_part * 3);
+        //Right Leg
+        imageflip($canvas_leg, IMG_FLIP_HORIZONTAL);
+        imagecopy($canvas_front, $canvas_leg, $f_part * 2, $f_part * 5, 0, 0, $f_part, $f_part * 3);
+        //Resize
+        imagecopyresized($canvas, $canvas_front, 0, 0, 0, 0,   $size, $size * 2, $fraction * 2, $fraction * 4);
+        return $canvas;
+    }
+    /**
+     * @param array{0: GdImage, 1: int} $data
+     */
+    public static function back(array $data, int $size): GdImage
+    {
+        // Создано пока что только для скинов по шаблону 64x32
+        [$image, $fraction] = $data;
+        $canvas = GDUtils::create_canvas_transparent($size, $size * 2);
+        /** @var int $f_part */
+        $f_part = $fraction / 2;
+        $canvas_back = GDUtils::create_canvas_transparent($fraction * 2, $fraction * 4);
+        $canvas_arm = GDUtils::create_canvas_transparent($f_part, $f_part * 3);
+        $canvas_leg = $canvas_arm;
+        // Head
+        imagecopy($canvas_back, $image, $f_part, 0, $fraction * 3, $fraction, $fraction, $fraction);
+        //Helmet
+        imagecopy($canvas_back, $image, $f_part, 0, $fraction * 7, $fraction, $fraction, $fraction);
+        // Torso
+        imagecopy($canvas_back, $image, $f_part, $f_part * 2, $f_part * 8, $f_part * 5, $f_part * 2, $f_part * 3);
+        //Left Arm
+        imagecopy($canvas_arm, $image, 0, 0, $f_part * 13, $f_part * 5, $f_part, $f_part * 3);
+        imagecopy($canvas_back, $canvas_arm, $f_part * 3, $f_part * 2, 0, 0, $f_part, $f_part * 3);
+        //Right Arm
+        imageflip($canvas_arm, IMG_FLIP_HORIZONTAL);
+        imagecopy($canvas_back, $canvas_arm, 0, $f_part * 2, 0, 0, $f_part, $f_part * 3);
+        //Left Leg
+        imagecopy($canvas_leg, $image, 0, 0, $f_part * 3, $f_part * 5, $f_part, $f_part * 3);
+        imagecopy($canvas_back, $canvas_leg, $f_part * 2, $f_part * 5, 0, 0, $f_part, $f_part * 3);
+        //Right Leg
+        imageflip($canvas_leg, IMG_FLIP_HORIZONTAL);
+        imagecopy($canvas_back, $canvas_leg, $f_part, $f_part * 5, 0, 0, $f_part, $f_part * 3);
+        //Resize
+        imagecopyresized($canvas, $canvas_back, 0, 0, 0, 0,   $size, $size * 2, $fraction * 2, $fraction * 4);
+        return $canvas;
+    }
+    /**
+     * @param array{0: GdImage, 1: int} $data
+     */
+    public static function avatar(array $data, int $size): GdImage
+    {
+        [$image, $fraction] = $data;
+        $canvas = GDUtils::create_canvas_transparent($size, $size);
+        $size_under = (int)floor($size / 1.1);
+        if ($size_under % 2 !== 0) $size_under--;
+        /** @var int $size_part */
+        $size_part = ($size - $size_under) / 2;
+        imagecopyresized(
+            $canvas,
+            $image,
+            $size_part,
+            $size_part,
+            $fraction,
+            $fraction,
+            $size_under,
+            $size_under,
+            $fraction,
+            $fraction
+        );
+        imagecopyresized(
+            $canvas,
+            $image,
+            0,
+            0,
+            $fraction * 5,
+            $fraction,
+            $size,
+            $size,
+            $fraction,
+            $fraction
+        );
+        return $canvas;
+    }
+    public static function cape_resize(string $data, int $size): GdImage
+    {
+        $image = imagecreatefromstring($data);
+        $width = imagesx($image);
+        /** @var int $fraction */
+        $fraction = $width / 64;
+        $canvas = GDUtils::create_canvas_transparent($size * 22, $size * 17);
+        imagecopyresized($canvas, $image, 0, 0, 0, 0, $size * 22, $size * 17, $fraction * 22, $fraction * 17);
+        return $canvas;
     }
 }

@@ -6,15 +6,15 @@ use Microwin7\PHPUtils\Utils\Texture;
 use Microwin7\TextureProvider\Config;
 use Microwin7\PHPUtils\Helpers\FileSystem;
 use Microwin7\PHPUtils\Response\JsonResponse;
-use function Microwin7\PHPUtils\str_ends_with_slash;
 use Microwin7\PHPUtils\Exceptions\NeedRe_GenerateCache;
+use Microwin7\PHPUtils\Contracts\Texture\Enum\TextureStorageTypeEnum;
 
 class IndexSkinRandomCollection
 {
     /** @var list<array{file: string, hash: string}> */
     private array $indexArray = [];
     private string $indexPath = __DIR__ . '/../../cache/index.json';
-    private int $countRe_Generate = 0;
+    private bool $regenerated = false;
     /**
      * Генерация index файла коллекции
      * Только для вызова командой
@@ -22,18 +22,18 @@ class IndexSkinRandomCollection
     public function generateIndex(): int
     {
         $fileSystem = new FileSystem;
-        $files = $fileSystem->findFiles(Config::SKIN_RANDOM_COLLECTION_PATH);
+        $files = $fileSystem->findFiles(Texture::TEXTURE_STORAGE_FULL_PATH(TextureStorageTypeEnum::COLLECTION));
         foreach ($files as $file) {
             $data = file_get_contents($file);
 
             $this->indexArray[] = [
-                'file' => str_replace(str_ends_with_slash(Config::SKIN_RANDOM_COLLECTION_PATH), '', $file),
+                'file' => str_replace(Texture::TEXTURE_STORAGE_FULL_PATH(TextureStorageTypeEnum::COLLECTION), '', $file),
                 'hash' => Texture::digest($data),
             ];
         }
         $directory = dirname($this->indexPath);
         if (!$fileSystem->is_dir($directory))
-            mkdir($directory, 0755, true);
+            FileSystem::mkdir($directory);
         file_put_contents(
             $this->indexPath,
             JsonResponse::json_encode($this->indexArray)
@@ -53,15 +53,15 @@ class IndexSkinRandomCollection
                 if (($count = count($fileData)) > 0) {
                     $modulo = $uuiddec % $count;
                     $index = $fileData[$modulo];
-                    $data = file_get_contents(str_ends_with_slash(Config::SKIN_RANDOM_COLLECTION_PATH) . $index->file) ?: throw new NeedRe_GenerateCache;
+                    ($data = file_get_contents(Texture::TEXTURE_STORAGE_FULL_PATH(TextureStorageTypeEnum::COLLECTION) . $index->file)) !== false ?: throw new NeedRe_GenerateCache;
                     $hash = Texture::digest($data);
                     if ($index->hash !== $hash) throw new NeedRe_GenerateCache;
                     return $data;
                 }
             }
         } catch (NeedRe_GenerateCache) {
-            if (Config::MAX_RE_GENERATE_CACHE_COUNT > $this->countRe_Generate) {
-                $this->countRe_Generate++;
+            if (Config::TRY_REGENERATE_CACHE() && !$this->regenerated) {
+                $this->regenerated = true;
                 if ($this->generateIndex() > 0) $this->getDataFromUUID($uuid);
             } else throw new NeedRe_GenerateCache;
         }

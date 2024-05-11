@@ -1,11 +1,3 @@
--- Active: 1704156387972@@127.0.0.1@3306@site
--- --------------------------------------------------------
--- Хост:                         127.0.0.1
--- Версия сервера:               11.2.2-MariaDB-1:11.2.2+maria~ubu2204 - mariadb.org binary distribution
--- Операционная система:         debian-linux-gnu
--- HeidiSQL Версия:              12.5.0.6749
--- --------------------------------------------------------
-
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET NAMES utf8 */;
 /*!50503 SET NAMES utf8mb4 */;
@@ -15,7 +7,6 @@
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
--- Дамп структуры для таблица site.hwids
 CREATE TABLE IF NOT EXISTS `hwids` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `publickey` blob DEFAULT NULL,
@@ -33,8 +24,6 @@ CREATE TABLE IF NOT EXISTS `hwids` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `publickey` (`publickey`(255))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
-
--- Экспортируемые данные не выделены.
 
 /*!40103 SET TIME_ZONE=IFNULL(@OLD_TIME_ZONE, 'system') */;
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;

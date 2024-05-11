@@ -6,14 +6,14 @@ namespace Microwin7\TextureProvider\Texture\Storage;
 
 use TypeError;
 use Microwin7\TextureProvider\Config;
-use Microwin7\TextureProvider\Utils\GDUtils;
-use Microwin7\PHPUtils\Configs\TextureConfig;
-use Microwin7\TextureProvider\Texture\Texture;
 use Microwin7\PHPUtils\Helpers\FileSystem;
+use Microwin7\TextureProvider\Utils\GDUtils;
+use Microwin7\TextureProvider\Texture\Texture;
+use Microwin7\PHPUtils\Utils\Texture as UtilsTexture;
+use Microwin7\PHPUtils\Exceptions\FileSystemException;
+use Microwin7\PHPUtils\Contracts\User\UserStorageTypeEnum;
 use Microwin7\TextureProvider\Request\Provider\RequestParams;
 use Microwin7\PHPUtils\Contracts\Texture\Enum\ResponseTypeEnum;
-use Microwin7\PHPUtils\Utils\Texture as UtilsTexture;
-use Microwin7\PHPUtils\Contracts\User\UserStorageTypeEnum;
 use Microwin7\PHPUtils\Contracts\Texture\Enum\TextureStorageTypeEnum;
 
 class StorageType
@@ -31,15 +31,13 @@ class StorageType
         public          ?string             $skinID,
         public          ?true               $isSlim,
         public          ?string             $capeID,
-                        ResponseTypeEnum    $responseType
+        ResponseTypeEnum    $responseType
     ) {
         $this->fileSystem = new FileSystem;
         if ($this->skinID !== null && in_array($responseType, [ResponseTypeEnum::JSON, ResponseTypeEnum::SKIN, ResponseTypeEnum::AVATAR])) {
             if (!is_null($this->skinData = $this->getSkinData())) {
-                if ($responseType === ResponseTypeEnum::SKIN) {
-                    $this->skinResize();
-                    Texture::ResponseTexture($this->skinData);
-                } 
+                if ($responseType !== ResponseTypeEnum::JSON && $responseType !== ResponseTypeEnum::AVATAR) $this->skinResize();
+                if ($responseType === ResponseTypeEnum::SKIN) Texture::ResponseTexture($this->skinData);
                 if ($responseType !== ResponseTypeEnum::AVATAR) {
                     $this->skinUrl = $this->getSkinUrl($responseType);
                     $this->skinSlim = $this->checkIsSlim();
@@ -55,23 +53,34 @@ class StorageType
     }
     private function getSkinData(): ?string
     {
-        if (Config::USER_STORAGE_TYPE === UserStorageTypeEnum::USERNAME) {
-            if (!$this->fileSystem->is_file($skinPath = UtilsTexture::getSkinPath($this->skinID))) {
-                $username = $this->fileSystem->findFile(UtilsTexture::getSkinPathStorage(), $this->skinID, TextureConfig::EXT);
+        /** @var string $this->skinID */
+        if (Config::USER_STORAGE_TYPE() === UserStorageTypeEnum::USERNAME) {
+            if (!$this->fileSystem->is_file($skinPath = UtilsTexture::PATH(ResponseTypeEnum::SKIN, $this->skinID))) {
+                $textureSkinStorage = UtilsTexture::TEXTURE_STORAGE_FULL_PATH(ResponseTypeEnum::SKIN);
+                try {
+                    $username = $this->fileSystem->findFile($textureSkinStorage, $this->skinID, UtilsTexture::EXTENSTION());
+                } catch (FileSystemException $e) {
+                    if ($e->isErrorFolderNotExist()) FileSystem::mkdir($textureSkinStorage);
+                    $username = null;
+                }
                 if ($username !== null) {
-                    return file_get_contents(UtilsTexture::getSkinPath($this->skinID = $username));
+                    return file_get_contents(UtilsTexture::PATH(ResponseTypeEnum::SKIN, $this->skinID = $username));
                 } else {
                     return null;
                 }
             } else return file_get_contents($skinPath);
         } else {
-            return $this->fileSystem->is_file($skinPath = UtilsTexture::getSkinPath($this->skinID)) ?
+            return $this->fileSystem->is_file($skinPath = UtilsTexture::PATH(ResponseTypeEnum::SKIN, $this->skinID)) ?
                 file_get_contents($skinPath) : null;
         }
     }
     private function skinResize(): void
     {
-        if (Config::SKIN_RESIZE) {
+        /**
+         * @var string $this->skinData
+         * @var string $this->skinID
+         */
+        if (Config::SKIN_RESIZE()) {
             try {
                 $this->skinData = GDUtils::skin_resize($this->skinData);
             } catch (TypeError $e) {
@@ -95,6 +104,10 @@ class StorageType
     }
     private function checkIsSlim(): bool
     {
+        /**
+         * @var string $this->skinData
+         * @var string $this->skinID
+         */
         if ($this->isSlim) return $this->isSlim;
         try {
             return GDUtils::slim($this->skinData);
@@ -109,17 +122,24 @@ class StorageType
     }
     private function getCapeData(): ?string
     {
-        if (Config::USER_STORAGE_TYPE === UserStorageTypeEnum::USERNAME) {
-            if (!$this->fileSystem->is_file($capePath = UtilsTexture::getCapePath($this->capeID))) {
-                $username = $this->fileSystem->findFile(UtilsTexture::getCapePathStorage(), $this->capeID, TextureConfig::EXT);
+        /** @var string $this->capeID */
+        if (Config::USER_STORAGE_TYPE() === UserStorageTypeEnum::USERNAME) {
+            if (!$this->fileSystem->is_file($capePath = UtilsTexture::PATH(ResponseTypeEnum::CAPE, $this->capeID))) {
+                $textureCapeStorage = UtilsTexture::TEXTURE_STORAGE_FULL_PATH(ResponseTypeEnum::CAPE);
+                try {
+                    $username = $this->fileSystem->findFile($textureCapeStorage, $this->capeID, UtilsTexture::EXTENSTION());
+                } catch (FileSystemException $e) {
+                    if ($e->isErrorFolderNotExist()) FileSystem::mkdir($textureCapeStorage);
+                    $username = null;
+                }
                 if ($username !== null) {
-                    return file_get_contents(UtilsTexture::getCapePath($this->capeID = $username));
+                    return file_get_contents(UtilsTexture::PATH(ResponseTypeEnum::CAPE, $this->capeID = $username));
                 } else {
                     return $username;
                 }
             } else return file_get_contents($capePath);
         } else {
-            return $this->fileSystem->is_file($capePath = UtilsTexture::getCapePath($this->capeID)) ?
+            return $this->fileSystem->is_file($capePath = UtilsTexture::PATH(ResponseTypeEnum::CAPE, $this->capeID)) ?
                 file_get_contents($capePath) : null;
         }
     }

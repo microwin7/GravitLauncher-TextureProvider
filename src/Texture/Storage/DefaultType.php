@@ -7,8 +7,8 @@ namespace Microwin7\TextureProvider\Texture\Storage;
 use TypeError;
 use Microwin7\TextureProvider\Config;
 use Microwin7\TextureProvider\Utils\GDUtils;
-use Microwin7\PHPUtils\Configs\TextureConfig;
 use Microwin7\TextureProvider\Texture\Texture;
+use Microwin7\PHPUtils\Utils\Texture as TextureUtils;
 use Microwin7\TextureProvider\Request\Provider\RequestParams;
 use Microwin7\PHPUtils\Contracts\Texture\Enum\ResponseTypeEnum;
 use Microwin7\PHPUtils\Contracts\Texture\Enum\TextureStorageTypeEnum;
@@ -23,34 +23,34 @@ class DefaultType
     public readonly string              $capeUrl;
 
     function __construct(
-                    ResponseTypeEnum    $responseType,
-                    bool                $skinAlreadyDetected,
-                    bool                $capeAlreadyDetected
+        ResponseTypeEnum    $responseType,
+        bool                $skinAlreadyDetected,
+        bool                $capeAlreadyDetected
     ) {
-        if ($skinAlreadyDetected === false && Config::GIVE_DEFAULT_SKIN && in_array($responseType, [ResponseTypeEnum::JSON, ResponseTypeEnum::SKIN, ResponseTypeEnum::AVATAR])) {
-            if (!is_null($this->skinData = $this->getSkinData())) {
-                if ($responseType === ResponseTypeEnum::SKIN) {
-                    $this->skinResize();
-                    Texture::ResponseTexture($this->skinData);
-                }
-                $this->skinUrl = $this->getSkinUrl();
-                $this->skinSlim = $this->checkIsSlim();
-            }
+        if (
+            $skinAlreadyDetected === false && (Config::GIVE_DEFAULT_SKIN() || $responseType === ResponseTypeEnum::AVATAR) &&
+            in_array($responseType, [ResponseTypeEnum::JSON, ResponseTypeEnum::SKIN, ResponseTypeEnum::AVATAR])
+        ) {
+            $this->skinData = $this->getSkinData();
+            if ($responseType !== ResponseTypeEnum::JSON && $responseType !== ResponseTypeEnum::AVATAR) $this->skinResize();
+            if ($responseType === ResponseTypeEnum::SKIN) Texture::ResponseTexture($this->skinData);
+            $this->skinUrl = $this->getSkinUrl();
+            $this->skinSlim = $this->checkIsSlim();
         }
-        if ($capeAlreadyDetected === false && Config::GIVE_DEFAULT_CAPE && in_array($responseType, [ResponseTypeEnum::JSON, ResponseTypeEnum::CAPE])) {
-            if (!is_null($this->capeData = $this->getCapeData())) {
-                if ($responseType === ResponseTypeEnum::CAPE) Texture::ResponseTexture($this->capeData);
-                $this->capeUrl = $this->getCapeUrl();
-            }
+        if ($capeAlreadyDetected === false && Config::GIVE_DEFAULT_CAPE() && in_array($responseType, [ResponseTypeEnum::JSON, ResponseTypeEnum::CAPE])) {
+            $this->capeData = $this->getCapeData();
+            if ($responseType === ResponseTypeEnum::CAPE) Texture::ResponseTexture($this->capeData);
+            $this->capeUrl = $this->getCapeUrl();
         }
     }
-    private function getSkinData(): ?string
+    private function getSkinData(): string
     {
-        return base64_decode(TextureConfig::SKIN_DEFAULT) ?: null;
+        return TextureUtils::SKIN_DEFAULT();
     }
     private function skinResize(): void
     {
-        if (Config::SKIN_RESIZE && $this->skinData !== null) {
+        /** @var string $this->skinData */
+        if (Config::SKIN_RESIZE()) {
             try {
                 $this->skinData = GDUtils::skin_resize($this->skinData);
             } catch (TypeError $e) {
@@ -71,6 +71,7 @@ class DefaultType
     }
     private function checkIsSlim(): bool
     {
+        /** @var string $this->skinData */
         try {
             return GDUtils::slim($this->skinData);
         } catch (TypeError $e) {
@@ -81,15 +82,15 @@ class DefaultType
             ));
         }
     }
-    private function getCapeData(): ?string
+    private function getCapeData(): string
     {
-        return base64_decode(TextureConfig::CAPE_DEFAULT) ?: null;
+        return TextureUtils::CAPE_DEFAULT();
     }
     private function getCapeUrl(): string
     {
         return (string)(new RequestParams)
-        ->withEnum(ResponseTypeEnum::CAPE)
-        ->withEnum(TextureStorageTypeEnum::DEFAULT)
-        ->setVariable('login', NULL);
+            ->withEnum(ResponseTypeEnum::CAPE)
+            ->withEnum(TextureStorageTypeEnum::DEFAULT)
+            ->setVariable('login', NULL);
     }
 }

@@ -1,11 +1,3 @@
--- Active: 1704156387972@@127.0.0.1@3306@site
--- --------------------------------------------------------
--- Хост:                         127.0.0.1
--- Версия сервера:               11.2.2-MariaDB-1:11.2.2+maria~ubu2204 - mariadb.org binary distribution
--- Операционная система:         debian-linux-gnu
--- HeidiSQL Версия:              12.5.0.6749
--- --------------------------------------------------------
-
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET NAMES utf8 */;
 /*!50503 SET NAMES utf8mb4 */;
@@ -15,7 +7,6 @@
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
--- Дамп структуры для таблица site.users
 CREATE TABLE IF NOT EXISTS `users` (
   `user_id` int(11) NOT NULL AUTO_INCREMENT,
   `username` varchar(40) NOT NULL DEFAULT '',
@@ -33,9 +24,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   KEY `username_idx` (`username`) USING BTREE,
   KEY `users_hwidfk` (`hwidId`),
   CONSTRAINT `users_hwidfk` FOREIGN KEY (`hwidId`) REFERENCES `hwids` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- Экспортируемые данные не выделены.
+) ENGINE=InnoDB AUTO_INCREMENT=5784 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 /*!40103 SET TIME_ZONE=IFNULL(@OLD_TIME_ZONE, 'system') */;
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;

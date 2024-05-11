@@ -16,28 +16,27 @@ use Microwin7\PHPUtils\Contracts\Texture\Enum\TextureStorageTypeEnum;
 class CollectionType
 {
     public              ?string             $skinData = null;
-    /** @psalm-suppress PropertyNotSetInConstructor */
     public readonly     string              $skinUrl;
-    /** @psalm-suppress PropertyNotSetInConstructor */
     public readonly     bool                $skinSlim;
-    public              null                $capeData = null;
-    public              string              $capeUrl = '';
+    public readonly     null                $capeData;
+    public readonly     string              $capeUrl;
 
     private IndexSkinRandomCollection       $index;
 
     function __construct(
         public readonly string              $uuid,
-                        ResponseTypeEnum    $responseType
+        ResponseTypeEnum    $responseType
     ) {
         $this->index = new IndexSkinRandomCollection;
         if (!is_null($this->skinData = $this->getSkinData())) {
-            if ($responseType === ResponseTypeEnum::SKIN) {
-                $this->skinResize();
-                Texture::ResponseTexture($this->skinData);
-            }
+            if ($responseType !== ResponseTypeEnum::JSON && $responseType !== ResponseTypeEnum::AVATAR) $this->skinResize();
+            if ($responseType === ResponseTypeEnum::SKIN) Texture::ResponseTexture($this->skinData);
             $this->skinUrl = $this->getSkinUrl();
             $this->skinSlim = $this->checkIsSlim();
         }
+
+        $this->capeData = null;
+        $this->capeUrl = '';
     }
     private function getSkinData(): ?string
     {
@@ -45,7 +44,8 @@ class CollectionType
     }
     private function skinResize(): void
     {
-        if (Config::SKIN_RESIZE && $this->skinData !== null) {
+        /** @var string $this->skinData */
+        if (Config::SKIN_RESIZE()) {
             try {
                 $this->skinData = GDUtils::skin_resize($this->skinData);
             } catch (TypeError $e) {
@@ -67,6 +67,7 @@ class CollectionType
     }
     private function checkIsSlim(): bool
     {
+        /** @var string $this->skinData */
         try {
             return GDUtils::slim($this->skinData);
         } catch (TypeError $e) {

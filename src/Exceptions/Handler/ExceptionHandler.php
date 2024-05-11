@@ -2,23 +2,20 @@
 
 namespace Microwin7\PHPUtils\Exceptions\Handler;
 
-use Microwin7\PHPUtils\Configs\MainConfig;
+use Microwin7\PHPUtils\Main;
 use Microwin7\PHPUtils\Response\JsonResponse;
 use Microwin7\PHPUtils\Exceptions\FileUploadException;
 use Microwin7\PHPUtils\Exceptions\TextureSizeException;
 use Microwin7\PHPUtils\Exceptions\TextureLoaderException;
 use Microwin7\PHPUtils\Exceptions\ValidateBearerTokenException;
+use Microwin7\PHPUtils\Exceptions\RegexArgumentsFailedException;
 use Microwin7\PHPUtils\Exceptions\RequiredArgumentMissingException;
 
 class ExceptionHandler
 {
     public function __construct()
     {
-        /**
-         * Need Library Sentry, install: composer require sentry/sdk
-         */
-        if (MainConfig::SENTRY_ENABLE) \Sentry\init(['dsn' => MainConfig::SENTRY_DSN]);
-
+        if (Main::SENTRY_ENABLE()) \Sentry\init(['dsn' => Main::SENTRY_DSN()]);
         /**
          * Sets a user-defined exception handler function
          */
@@ -31,7 +28,7 @@ class ExceptionHandler
             // provided key/key-array is empty or malformed.
         }
         if ($e instanceof \DomainException) {
-            if (MainConfig::SENTRY_ENABLE) \Sentry\captureException($e);
+            if (Main::SENTRY_ENABLE()) \Sentry\captureException($e);
             $this->error('DomainException');
             // provided algorithm is unsupported OR
             // provided key is invalid OR
@@ -39,12 +36,12 @@ class ExceptionHandler
             // libsodium is required but not available.
         }
         if ($e instanceof \Firebase\JWT\SignatureInvalidException) {
-            if (MainConfig::SENTRY_ENABLE) \Sentry\captureException($e);
+            if (Main::SENTRY_ENABLE()) \Sentry\captureException($e);
             $this->error('Неправильная сигнатура публичного ключа');
             // provided JWT signature verification failed.
         }
         if ($e instanceof \Firebase\JWT\BeforeValidException) {
-            if (MainConfig::SENTRY_ENABLE) \Sentry\captureException($e);
+            if (Main::SENTRY_ENABLE()) \Sentry\captureException($e);
             $this->error('BeforeValidException');
             // provided JWT is trying to be used before "nbf" claim OR
             // provided JWT is trying to be used before "iat" claim.
@@ -54,7 +51,7 @@ class ExceptionHandler
             // provided JWT is trying to be used after "exp" claim.
         }
         if ($e instanceof \UnexpectedValueException) {
-            if (MainConfig::SENTRY_ENABLE) \Sentry\captureException($e);
+            if (Main::SENTRY_ENABLE()) \Sentry\captureException($e);
             $this->error('UnexpectedValueException');
             // provided JWT is malformed OR
             // provided JWT is missing an algorithm / using an unsupported algorithm OR
@@ -66,15 +63,18 @@ class ExceptionHandler
             $e instanceof RequiredArgumentMissingException ||
             $e instanceof FileUploadException ||
             $e instanceof TextureSizeException ||
-            $e instanceof TextureLoaderException
+            $e instanceof TextureLoaderException ||
+            $e instanceof RegexArgumentsFailedException ||
+            $e instanceof \RuntimeException
         ) {
             $this->error($e);
         }
         if ($e instanceof \ErrorException) {
-            if (MainConfig::SENTRY_ENABLE) \Sentry\captureException($e);
+            if (Main::SENTRY_ENABLE()) \Sentry\captureException($e);
+            $this->error('ErrorException');
         }
         if ($e instanceof \Throwable) {
-            if (MainConfig::SENTRY_ENABLE) \Sentry\captureException($e);
+            if (Main::SENTRY_ENABLE()) \Sentry\captureException($e);
             $this->error($e);
         }
     }

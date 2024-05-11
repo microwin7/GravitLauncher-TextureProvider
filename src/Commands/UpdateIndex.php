@@ -2,11 +2,13 @@
 
 namespace Microwin7\TextureProvider\Commands;
 
+use Microwin7\PHPUtils\Contracts\Texture\Enum\TextureStorageTypeEnum;
 use Microwin7\TextureProvider\Config;
 use Microwin7\TextureProvider\Utils\IndexSkinRandomCollection;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Microwin7\PHPUtils\Services\InputOutput;
+use Microwin7\PHPUtils\Utils\Texture;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -19,7 +21,7 @@ class UpdateIndex extends Command
         $io = new InputOutput($input, $output);
         $io->title($this->getDescription());
 
-        $io->info(sprintf('Папка коллекции определена как: %s', Config::SKIN_RANDOM_COLLECTION_PATH));
+        $io->info(sprintf('Папка коллекции определена как: %s', Texture::TEXTURE_STORAGE_FULL_PATH(TextureStorageTypeEnum::COLLECTION)));
         $io->info('Начата индексация файлов');
         $io->success([
             sprintf('Проиндексировано %u скинов', (new IndexSkinRandomCollection)->generateIndex()),

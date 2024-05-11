@@ -76,7 +76,8 @@ class MigrationToHash extends Command
         )->array();
         $this->io->success(sprintf('Обнаружено %u пользователей в Базе Данных', count($users)));
 
-        $textureFiles = $this->fileSystem->findFiles($this->currentInputPath, 0);
+        $textureFiles = $this->fileSystem->findFiles($this->currentInputPath, Texture::EXTENSTION(), 0);
+        // $textureFiles = $this->fileSystem->findFiles($this->currentInputPath, 0);
 
         $loginColumn = match ($this->selectedUserStorageTypeInput) {
             UserStorageTypeEnum::USERNAME => $user_username_column,
@@ -90,7 +91,7 @@ class MigrationToHash extends Command
             $this->io->info('Поиск совпадений');
             $progressBar = $this->createProgressBar($output);
             foreach ($progressBar->iterate($users) as $userRow) {
-                $path = $this->currentInputPath . $userRow[$loginColumn] . Texture::EXT();
+                $path = $this->currentInputPath . $userRow[$loginColumn] . Texture::EXTENSTION();
                 if (in_array($path, $textureFiles))
                     $matchingTextureLogins[] = $userRow;
             }
@@ -103,26 +104,27 @@ class MigrationToHash extends Command
             foreach ($progressBar->iterate($matchingTextureLogins) as $user) {
                 $user_id = $user[$user_id_column];
                 $loginTexture = $user[$loginColumn];
-                $dataSkin = file_get_contents($this->currentInputPath . $loginTexture . Texture::EXT());
+                $dataSkin = file_get_contents($this->currentInputPath . $loginTexture . Texture::EXTENSTION());
 
                 if ($dataSkin !== false) {
                     if (($mime = GDUtils::getImageMimeType($dataSkin)) !== IMAGETYPE_PNG) {
                         $textureSizeInvalidListMessage[] = sprintf(
                             'Текстура: %s не является форматом PNG.'
                                 . (null === $mime ? '' : PHP_EOL . 'Обнаружен: ' . $mime),
-                            $loginTexture . Texture::EXT()
+                            $loginTexture . Texture::EXTENSTION()
                         );
                         continue;
                     }
                     [$image, $w, $h] = GDUtils::pre_calculation($dataSkin);
+                    
                     try {
-                        Texture::validateHDSize($w, $h, $this->selectedMode->name);
+                        Texture::validateHDSize($w, $h, $this->selectedMode);
                     } catch (TextureSizeHDException $e) {
                         try {
-                            Texture::validateSize($w, $h, $this->selectedMode->name);
+                            Texture::validateSize($w, $h, $this->selectedMode);
                         } catch (TextureSizeException $e) {
                             $textureSizeInvalidListMessage[] =
-                                sprintf('Текстура: %s не соответствует разрешённым размерам. Обнаружен размер: %ux%u', $loginTexture . Texture::EXT(), $w, $h);
+                                sprintf('Текстура: %s не соответствует разрешённым размерам. Обнаружен размер: %ux%u', $loginTexture . Texture::EXTENSTION(), $w, $h);
                             $not_valid_texture++;
                             continue;
                         }
@@ -135,8 +137,7 @@ class MigrationToHash extends Command
                         continue;
                         // throw new \TypeError($e->getMessage());
                     }
-
-                    if (copy($this->currentInputPath . $loginTexture . Texture::EXT(), Texture::getSkinPath($dataHash))) {
+                    if (copy($this->currentInputPath . $loginTexture . Texture::EXTENSTION(), Texture::PATH($this->selectedMode, $dataHash))) {
                         ProviderTexture::insertOrUpdateAssetDB((string)$user_id, $this->selectedMode->name, $dataHash, $meta_texture);
                     } else {
                         $this->io->error('Копирование файла не удалось, проверьте права доступа в директорию назначения!');

@@ -44,7 +44,7 @@ final class User
      * HYBRID - Все кроме выключенных хранилищ в конфиге и типов текстур
      */
     public MethodTypeEnum $methodType;
-    public function __construct(private RequestParams $requestParams)
+    public function __construct(RequestParams $requestParams)
     {
         /** @var ResponseTypeEnum */
         $this->responseType = $requestParams->responseType;

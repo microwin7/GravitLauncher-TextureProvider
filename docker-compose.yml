@@ -1,14 +1,19 @@
 services:
-  nginx:
-    build:
-      context: .
-      dockerfile: Dockerfile.nginx
-    ports:
-      - 29300:80
   php-fpm:
     build:
       context: .
       dockerfile: Dockerfile.php-fpm
+    restart: always
     volumes:
       - ./cache:/var/www/html/cache
       - ./storage:/var/www/html/storage
+      - ./.env:/var/www/html/.env
+  nginx:
+    build:
+      context: .
+      dockerfile: Dockerfile.nginx
+    restart: always
+    ports:
+      - 29300:80
+    depends_on:
+      - php-fpm
