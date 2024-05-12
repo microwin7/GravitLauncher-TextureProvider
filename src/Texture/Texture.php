@@ -247,7 +247,7 @@ class Texture implements JsonSerializable
 
         try {
             TextureUtils::validateHDSize($w, $h, $requestParams->responseType);
-            if (Config::LUCKPERMS_USE_PERMISSION_HD_SKIN() && (new LuckPerms($requestParams))->getUserWeight() < Config::LUCKPERMS_MIN_WEIGHT() || !$hdAllow) {
+            if ((Config::LUCKPERMS_USE_PERMISSION_HD_SKIN() && (new LuckPerms($requestParams))->getUserWeight() < Config::LUCKPERMS_MIN_WEIGHT()) && !$hdAllow) {
                 match ($requestParams->responseType) {
                     ResponseTypeEnum::SKIN => throw new TextureLoaderException(NO_HD_SKIN_PERMISSION),
                     ResponseTypeEnum::CAPE => throw new TextureLoaderException(NO_HD_CAPE_PERMISSION),
