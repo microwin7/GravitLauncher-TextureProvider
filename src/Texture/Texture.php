@@ -369,7 +369,7 @@ class Texture implements JsonSerializable
                                 return $v !== null;
                             }
                         )),
-                        FALSE => 'returner.php?' . http_build_query(
+                        FALSE => 'index.php?' . http_build_query(
                             [
                                 ResponseTypeEnum::getNameRequestVariable() => ResponseTypeEnum::AVATAR->name,
                                 'size' => Config::AVATAR_CANVAS(),
