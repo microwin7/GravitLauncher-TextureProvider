@@ -103,7 +103,7 @@ class InitRequest
                         JsonResponse::response(
                             TextureProvider::loadTexture(
                                 /** AutoInit ResponseTypeEnum from request, validate after only SKIN or CAPE */
-                                (new RequestParamsLoader)
+                                (RequestParamsLoader::fromRoute($this->routeInfo->variables))
                                     /** Variable username for UserStorageTypeEnum::USERNAME in Config::USER_STORAGE_TYPE */
                                     ->setVariable('username', $JWT_DATA->sub)
                                     /** Variable uuid for other enum types in Config::USER_STORAGE_TYPE */

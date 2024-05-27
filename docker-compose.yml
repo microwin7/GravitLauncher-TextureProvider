@@ -4,8 +4,14 @@ services:
       context: .
       dockerfile: Dockerfile.php-fpm
     restart: always
+    environment:
+      - ROOT_FOLDER=/var/www/html
+      - USER_ID=33
+      - GROUP_ID=33
     volumes:
       - ./cache:/var/www/html/cache
+      - ./config/php-utils:/var/www/html/config/php-utils
+      - ./db_logs:/var/www/db_logs
       - ./storage:/var/www/html/storage
       - ./.env:/var/www/html/.env
   nginx:

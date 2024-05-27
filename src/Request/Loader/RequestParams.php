@@ -14,12 +14,13 @@ final class RequestParams extends RequestParamsAbstract
     /** @psalm-suppress MixedInferredReturnType */
     public static function fromRequest(self|\Closure|null $requestParams = null): static
     {
-        return new static();
+        return (new static())->setOptions($_REQUEST)
+        ->addEnum(ResponseTypeEnum::class);
     }
-    public function __construct()
+    public static function fromRoute(array $vars): static
     {
-        $this->setOptions($_REQUEST)
-            ->addEnum(ResponseTypeEnum::class);
+        return (new static())->setOptions($vars)
+        ->addEnum(ResponseTypeEnum::class);
     }
     public function __toString(): string
     {

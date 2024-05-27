@@ -4,7 +4,8 @@ use Microwin7\PHPUtils\Rules\Regex;
 
 require_once(__DIR__ . '/../../vendor/autoload.php');
 
-if (($env_lines = file(__DIR__ . '/../../.env', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES)) !== false) {
+/** @var string $env_filename */
+if (($env_lines = file(__DIR__ . '/../../' . ($env_filename = getenv('ENV_FILENAME') === false ? '.env' : $env_filename), FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES)) !== false) {
     $finalLines = [];
     $finalLines = array_filter($env_lines, function ($line) {
         return Regex::valid_with_pattern($line, '/^([A-Z0-9\_]+)=(.*?)$/');
@@ -14,4 +15,3 @@ if (($env_lines = file(__DIR__ . '/../../.env', FILE_IGNORE_NEW_LINES | FILE_SKI
         if (getenv($matches[1]) === false) putenv($matches[0]);
     }
 }
-
