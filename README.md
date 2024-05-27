@@ -62,34 +62,23 @@
 
 # Установка
 ## Установка в Docker контейнер:
+### Установка Docker
 - Выполнение команд от sudo (Перейти в root, если является пользователем не по умолчанию):
 ```bash
 sudo -s
 ```
-- Обновить зависимости. Пример:
+- Следующая команда:
+  - Обновляет зависимости
+  - Установка утилит
+  - Скачивает скрипт установки Docker
+  - Выдача прав запуска скрипта и запуск установки Docker
+  - Запуск службы
 ```bash
-apt update
-```
-- Скачать скрипт установки:
-```bash
-curl -fsSL https://get.docker.com -o get-docker.sh
-```
-- Запуск через sh:
-```bash
-sh get-docker.sh
-```
-- Запуск чере bash:
-```bash
-chmod +x get-docker.sh ; ./get-docker.sh
-```
-- Запуск службы:
-```bash
-service docker start
-```
-### Одной командой:
-```bash
-apt update ; apt install gnupg2 apt-transport-https curl -y; curl -fsSL https://get.docker.com -o get-docker.sh ;
-chmod +x get-docker.sh ; ./get-docker.sh ;
+apt update ;
+apt install gnupg2 apt-transport-https curl -y;
+curl -fsSL https://get.docker.com -o get-docker.sh ;
+chmod +x get-docker.sh ;
+./get-docker.sh ;
 service docker start
 ```
 ### Выбираем где будет располагаться скрипт, лучше всего вне сайта. И устанавливаем texture-provider
@@ -107,13 +96,22 @@ docker compose -f docker-compose.yml up -d --build
 ```bash
 docker compose -f docker-compose.yml exec php-fpm chown -R www-data:www-data storage
 ```
-#### Остановка контейнеров:
+### Остановка контейнеров:
 ```bash
 docker compose -f docker-compose.yml stop
 ```
-#### Запуск контейнеров / Перезапуск (если изменился файл docker-compose.yml):
+### Запуск контейнеров / Перезапуск (если изменился файл docker-compose.yml):
 ```bash
 docker compose -f docker-compose.yml up -d
+```
+### Если у вас своя папка storage
+- Удалите текущую папку storage
+```bash
+rm -rf storage
+```
+- Создайте ссылку на папку storage. ПРИМЕР для Azuriom:
+```bash
+ln -s /var/www/html/Azuriom_SITE/storage/app/public storage
 ```
 ### Настройка nginx на вашем хосте:
 #### Для установки на сайт:
