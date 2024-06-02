@@ -1,6 +1,6 @@
 .git
 .vscode
-.env
+.env*
 cache
 db_logs
 storage

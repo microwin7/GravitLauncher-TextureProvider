@@ -27,6 +27,7 @@ use Microwin7\PHPUtils\Exceptions\RequiredArgumentMissingException;
 use Microwin7\PHPUtils\Contracts\Texture\Enum\TextureStorageTypeEnum;
 use Microwin7\TextureProvider\Request\Loader\RequestParams as RequestParamsLoader;
 use Microwin7\TextureProvider\Request\Provider\RequestParams as RequestParamsProvider;
+use function Microwin7\PHPUtils\ar_slash_string;
 
 class InitRequest
 {
@@ -46,44 +47,52 @@ class InitRequest
         $dispatcher = \FastRoute\simpleDispatcher(function (ConfigureRoutes $r) {
             $r->addRoute(
                 HTTP::GET->name,
-                '/{' . ResponseTypeEnum::getNameRequestVariable() . ':(?:SKIN|1|CAPE|2)}/{' .
+                '{' . ResponseTypeEnum::getNameRequestVariable() . ':(?:SKIN|1|CAPE|2)}/{' .
                     TextureStorageTypeEnum::getNameRequestVariable() . ':(?:STORAGE|0|COLLECTION|2)}/{login:(?:[0-9]+|\w{2,16}|[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}|[0-9a-f]{32}|[0-9a-f]{40}|[0-9a-f]{64})}',
                 'provider'
             );
             $r->addRoute(
                 HTTP::GET->name,
-                '/{' . ResponseTypeEnum::getNameRequestVariable() . ':(?:SKIN|1|CAPE|2)}/{' .
+                '{' . ResponseTypeEnum::getNameRequestVariable() . ':(?:SKIN|1|CAPE|2)}/{' .
                     TextureStorageTypeEnum::getNameRequestVariable() . ':(?:DEFAULT|3)}',
                 'provider'
             );
             $r->addRoute(
                 HTTP::GET->name,
-                '/{' . MethodTypeEnum::getNameRequestVariable() . ':(?:MOJANG|1|HYBRID|2)}/{username:\w{2,16}}/{uuid:[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}}',
+                '{' . MethodTypeEnum::getNameRequestVariable() . ':(?:MOJANG|1|HYBRID|2)}/{username:\w{2,16}}/{uuid:[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}}',
                 'provider'
             );
             $r->addRoute(
                 HTTP::GET->name,
-                '/{' . ResponseTypeEnum::getNameRequestVariable() . ':(?:AVATAR)}/{size:(?:[0-9]{2,3})}/{login:(?:[0-9]+|\w{2,16}|[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}|[0-9a-f]{32}|[0-9a-f]{40}|[0-9a-f]{64})}',
+                '{' . ResponseTypeEnum::getNameRequestVariable() . ':(?:AVATAR)}/{size:(?:[0-9]{2,3})}/{login:(?:[0-9]+|\w{2,16}|[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}|[0-9a-f]{32}|[0-9a-f]{40}|[0-9a-f]{64})}[{timestamp:(?:\?t=[0-9]{1,11}|\&t=[0-9]{1,11})}]',
                 'returner'
             );
             $r->addRoute(
                 HTTP::GET->name,
-                '/{' . ResponseTypeEnum::getNameRequestVariable() . ':(?:AVATAR)}/{login:(?:[0-9]+|\w{2,16}|[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}|[0-9a-f]{32}|[0-9a-f]{40}|[0-9a-f]{64})}',
+                '{' . ResponseTypeEnum::getNameRequestVariable() . ':(?:AVATAR)}/{login:(?:[0-9]+|\w{2,16}|[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}|[0-9a-f]{32}|[0-9a-f]{40}|[0-9a-f]{64})}[{timestamp:(?:\?t=[0-9]{1,11}|\&t=[0-9]{1,11})}]',
                 'returner'
             );
             $r->addRoute(
                 HTTP::GET->name,
-                '/{username:(?:\w{2,16})}/{uuid:(?:[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12})}',
+                '{username:(?:\w{2,16})}/{uuid:(?:[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12})}',
                 'provider'
             );
             $r->addRoute(
                 HTTP::POST->name,
-                '/upload/{' . ResponseTypeEnum::getNameRequestVariable() . ':(?:SKIN|1|CAPE|2)}',
+                'upload/{' . ResponseTypeEnum::getNameRequestVariable() . ':(?:SKIN|1|CAPE|2)}',
                 'upload'
             );
         });
-        /** @psalm-suppress PossiblyUndefinedArrayOffset */
-        $this->routeInfo = $dispatcher->dispatch($_SERVER['REQUEST_METHOD'], str_replace(Path::SCRIPT_PATH(), '', $_SERVER['REQUEST_URI']));
+
+        /**
+         * @var string $_SERVER['REQUEST_METHOD']
+         * @var string $_SERVER['REQUEST_URI']
+         */
+        $this->routeInfo = $dispatcher->dispatch($_SERVER['REQUEST_METHOD'], str_replace(
+            ar_slash_string(Path::SCRIPT_PATH(), true),
+            '',
+            $_SERVER['REQUEST_URI']
+        ));
     }
     private function postInit(): void
     {
@@ -108,7 +117,7 @@ class InitRequest
                                     ->setVariable('username', $JWT_DATA->sub)
                                     /** Variable uuid for other enum types in Config::USER_STORAGE_TYPE */
                                     ->setVariable('uuid', $JWT_DATA->uuid),
-                                    $file,
+                                $file,
                                 Config::HD_TEXTURES_ALLOW()
                             )
                         );
