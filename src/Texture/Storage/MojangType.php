@@ -9,8 +9,10 @@ use Microwin7\PHPUtils\Request\Data;
 
 class MojangType
 {
+    /** @psalm-suppress PropertyNotSetInConstructor */
     private readonly    string  $uuid;
-    /** @var object{
+    /**
+     * @var object{
      *  SKIN: object{
      *    url: string,
      *    metadata?: object{model: 'slim'|string}
@@ -19,10 +21,13 @@ class MojangType
      *    url: string
      *  }
      * }
+     * @psalm-suppress PropertyNotSetInConstructor
      */
     private readonly    object  $textures;
     public              ?string $skinData = null;
+    /** @psalm-suppress PropertyNotSetInConstructor */
     public  readonly    string  $skinUrl;
+    /** @psalm-suppress PropertyNotSetInConstructor */
     public  readonly    bool    $skinSlim;
     public              ?string $capeData = null;
     public              string  $capeUrl = '';

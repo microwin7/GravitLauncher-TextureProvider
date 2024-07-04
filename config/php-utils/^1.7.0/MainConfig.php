@@ -13,6 +13,14 @@ class MainConfig
     public const array SERVERS = [];
     /** @var array<string, array<string, string|array<string, string>>> */
     public const array MODULES = [
+        'ItemShop' => [
+            'DB_NAME' => 'ItemShop',
+            'prefix' => ''
+        ],
+        'VoteRewards' => [
+            'DB_NAME' => 'VoteRewards',
+            'prefix' => '',
+        ],
         'LuckPerms' => [
             'DB_NAME' => 'LuckPerms',
             'prefix' => 'luckperms_',

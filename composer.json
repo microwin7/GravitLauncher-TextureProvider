@@ -7,13 +7,14 @@
         "ext-gd": "*",
         "ext-mbstring": "*",
         "ext-json": "*",
-        "microwin7/php-utils": "1.7.0.4",
+        "microwin7/php-utils": "1.7.0.6",
         "symfony/console": "^7.0",
         "sentry/sentry": "^4.6",
         "firebase/php-jwt": "^6.10",
         "nesbot/carbon": "^3.3",
         "guzzlehttp/psr7": "^2.6",
-        "nikic/fast-route": "^2.0@dev"
+        "nikic/fast-route": "^2.0@dev",
+        "symfony/http-foundation": "7.2.x-dev"
     },
     "license": "GPL-3.0-or-later",
     "autoload": {
@@ -37,7 +38,7 @@
         "vimeo/psalm": "5.x-dev"
     },
     "bin": [
-        ".bin/index",
-        ".bin/index.bat"
+        "bin/index",
+        "bin/index.bat"
     ]
 }

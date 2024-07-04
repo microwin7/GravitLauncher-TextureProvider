@@ -17,7 +17,7 @@ class Cache
         if (!file_exists($directory))
             FileSystem::mkdir($directory);
         $filename = Texture::PATH($responseType, $login);
-        imagepng($canvas, $filename, 9) ?: throw FileSystemException::createForbidden();
+        imagepng($canvas, $filename, 9) ?: throw FileSystemException::createForbidden($directory);
     }
     public static function loadCacheFile(string $filename): string
     {

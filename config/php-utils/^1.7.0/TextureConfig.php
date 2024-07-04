@@ -2,6 +2,7 @@
 
 namespace Microwin7\PHPUtils\Configs;
 
+/** @psalm-suppress UnusedClass */
 class TextureConfig
 {
     protected const array SKIN_SIZE = [['w' => 64, 'h' => 64], ['w' => 64, 'h' => 32]];

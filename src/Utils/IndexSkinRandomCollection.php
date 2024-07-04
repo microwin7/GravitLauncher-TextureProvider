@@ -22,7 +22,7 @@ class IndexSkinRandomCollection
     public function generateIndex(): int
     {
         $fileSystem = new FileSystem;
-        $files = $fileSystem->findFiles(Texture::TEXTURE_STORAGE_FULL_PATH(TextureStorageTypeEnum::COLLECTION));
+        $files = $fileSystem->findFiles(Texture::TEXTURE_STORAGE_FULL_PATH(TextureStorageTypeEnum::COLLECTION), Texture::EXTENSTION());
         foreach ($files as $file) {
             $data = file_get_contents($file);
 

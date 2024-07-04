@@ -31,8 +31,8 @@ use function Microwin7\PHPUtils\ar_slash_string;
 
 class InitRequest
 {
+    /** @psalm-suppress PropertyNotSetInConstructor */
     public RequestParamsProvider $requestParams;
-    public int $size;
     public Matched|NotMatched|MethodNotAllowed $routeInfo;
 
     function __construct()
@@ -149,7 +149,7 @@ class InitRequest
                             $filename = Texture::PATH($this->requestParams->responseType, $this->requestParams->login);
                             Cache::removeCacheFiles($this->requestParams->responseType);
                             if (!Cache::cacheValid($filename, $size)) {
-                                [$image, $x, $y, $fraction] = GDUtils::pre_calculation(TextureProvider::getSkinDataForAvatar($this->requestParams->login));
+                                [$image, $_, $_, $fraction] = GDUtils::pre_calculation(TextureProvider::getSkinDataForAvatar($this->requestParams->login));
                                 Cache::saveCacheFile(
                                     $this->requestParams->login,
                                     GDUtils::avatar([$image, $fraction], $size),

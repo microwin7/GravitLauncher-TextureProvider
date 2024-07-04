@@ -21,6 +21,7 @@ use Microwin7\PHPUtils\Contracts\User\UserStorageTypeEnum;
 use Microwin7\PHPUtils\Contracts\Texture\Enum\ResponseTypeEnum;
 use Microwin7\TextureProvider\Texture\Texture as ProviderTexture;
 
+/** @psalm-suppress UnusedClass */
 #[AsCommand(name: 'migration', description: 'Миграция текстур')]
 class MigrationToHash extends Command
 {

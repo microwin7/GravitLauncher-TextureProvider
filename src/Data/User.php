@@ -60,6 +60,10 @@ final class User
         $this->methodType = $requestParams->methodType;
         $this->validParams();
     }
+    /**
+     * FOR API
+     * @psalm-suppress PossiblyUnusedMethod
+     */
     public static function getInstance(): static
     {
         if (static::$instance === null) {
@@ -67,6 +71,10 @@ final class User
         }
         return static::$instance;
     }
+    /**
+     * FOR API
+     * @psalm-suppress PossiblyUnusedMethod
+     */
     public static function initialize(string $username, string $uuid, ResponseTypeEnum $responseTypeEnum = ResponseTypeEnum::JSON): void
     {
         if (static::$instance === null) {
@@ -75,6 +83,11 @@ final class User
             throw new \Exception('Singleton instance has already been initialized.');
         }
     }
+    /**
+     * FOR API
+     * @psalm-suppress PossiblyUnusedMethod
+     * @psalm-suppress PossiblyUnusedReturnValue
+     */
     public static function newInstance(string $username, string $uuid, ResponseTypeEnum $responseTypeEnum = ResponseTypeEnum::JSON): static
     {
         return static::$instance = new static((new RequestParams)

@@ -62,6 +62,7 @@ class GDUtils extends UtilsGDUtils
     }
     /**
      * @param array{0: GdImage, 1: int} $data
+     * @psalm-suppress PossiblyUnusedMethod
      */
     public static function front(array $data, int $size): GdImage
     {
@@ -97,6 +98,7 @@ class GDUtils extends UtilsGDUtils
     }
     /**
      * @param array{0: GdImage, 1: int} $data
+     * @psalm-suppress PossiblyUnusedMethod
      */
     public static function back(array $data, int $size): GdImage
     {
@@ -167,6 +169,7 @@ class GDUtils extends UtilsGDUtils
         );
         return $canvas;
     }
+    /** @psalm-suppress PossiblyUnusedMethod */
     public static function cape_resize(string $data, int $size): GdImage
     {
         $image = imagecreatefromstring($data);

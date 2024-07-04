@@ -12,6 +12,7 @@ use Microwin7\PHPUtils\Utils\Texture;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
+/** @psalm-suppress UnusedClass */
 #[AsCommand(name: 'update', description: 'Индексация файлов коллекции рандомных скинов')]
 class UpdateIndex extends Command
 {

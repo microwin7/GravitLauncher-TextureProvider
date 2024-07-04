@@ -16,7 +16,9 @@ use Microwin7\PHPUtils\Contracts\Texture\Enum\TextureStorageTypeEnum;
 class CollectionType
 {
     public              ?string             $skinData = null;
+    /** @psalm-suppress PropertyNotSetInConstructor */
     public readonly     string              $skinUrl;
+    /** @psalm-suppress PropertyNotSetInConstructor */
     public readonly     bool                $skinSlim;
     public readonly     null                $capeData;
     public readonly     string              $capeUrl;

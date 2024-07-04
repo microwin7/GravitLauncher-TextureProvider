@@ -9,21 +9,12 @@
     findUnusedCode="true"
 >
     <projectFiles>
+        <directory name="bin" />
+        <directory name="config/php-utils/^1.7.0" />
+        <directory name="public" />
         <directory name="src" />
         <ignoreFiles>
             <directory name="vendor" />
         </ignoreFiles>
     </projectFiles>
-    <issueHandlers>
-        <RedundantCondition errorLevel="suppress" />
-        <TypeDoesNotContainType errorLevel="suppress" />
-        <PropertyNotSetInConstructor errorLevel="suppress" />
-        <PossiblyUnusedMethod errorLevel="suppress" />
-        <PossiblyUnusedProperty errorLevel="suppress" />
-        <PossiblyUnusedReturnValue errorLevel="suppress" />
-        <MixedArgumentTypeCoercion errorLevel="suppress" />
-        <MixedOperand errorLevel="suppress" />
-        <UnusedClass errorLevel="suppress" />
-        <UnusedVariable errorLevel="suppress" />
-    </issueHandlers>
 </psalm>

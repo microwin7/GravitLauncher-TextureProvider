@@ -19,10 +19,13 @@ use Microwin7\PHPUtils\Contracts\Texture\Enum\TextureStorageTypeEnum;
 class StorageType
 {
     public              ?string             $skinData = null;
+    /** @psalm-suppress PropertyNotSetInConstructor */
     public readonly     string              $skinUrl;
+    /** @psalm-suppress PropertyNotSetInConstructor */
     public readonly     bool                $skinSlim;
 
     public              ?string             $capeData = null;
+    /** @psalm-suppress PropertyNotSetInConstructor */
     public readonly     string              $capeUrl;
 
     private readonly    FileSystem          $fileSystem;
