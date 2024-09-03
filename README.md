@@ -36,7 +36,9 @@
 
 - GravitLauncher 5.2.9+
 - Консольный доступ SSH к хостингу. Для развёртывания библиотек
-### Если не используете Docker:
+<details>
+  <summary>Если не используете Docker (развернуть)</summary>
+
 - PHP 8.3+
 - Расширение Multibyte String `php-mbstring`. Пример: `sudo apt-get install php8.3-mbstring`
 - Расширение GD `php-gd`. Пример: `sudo apt-get install php8.3-gd`
@@ -59,6 +61,8 @@
     composer install --ignore-platform-req=ext-mysql --ignore-platform-req=ext-pgsql
     ```
 - Composer [Ссылка на иструкцию по установке Composer](https://getcomposer.org/download/)
+
+</details>
 
 # Установка
 ## Установка в Docker контейнер:
