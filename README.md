@@ -62,7 +62,13 @@
 
 # Установка
 ## Установка в Docker контейнер:
-### Установка Docker
+<img src="https://img.shields.io/badge/docker-2496ED?style=for-the-badge&logo=docker&logoColor=2496ED&label=%D1%83%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BA%D0%B0%20%D0%B8%20%D0%BD%D0%B0%D1%81%D1%82%D1%80%D0%BE%D0%B9%D0%BA%D0%B0%20%D1%81%20%D0%BF%D0%BE%D0%BC%D0%BE%D1%89%D1%8C%D1%8E&labelColor=white" alt="Docker" height="50"/>
+
+- Является более оптимальным вариантом установки, так как все модули и сам php будет установлен в изолированных контейнерах
+
+### Предварительная настройка | Установка Docker
+<img src="https://img.shields.io/badge/docker-2496ED?style=for-the-badge&logo=docker&logoColor=2496ED&label=%D1%83%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BA%D0%B0&labelColor=white" alt="Docker" height="35"/>
+
 - Выполнение команд от sudo (Перейти в root, если является пользователем не по умолчанию):
 ```bash
 sudo -s
@@ -81,6 +87,8 @@ chmod +x get-docker.sh ;
 ./get-docker.sh ;
 service docker start
 ```
+<img src="https://img.shields.io/badge/git-F05032?style=for-the-badge&logo=github&logoColor=181717&label=%D0%9A%D0%BB%D0%BE%D0%BD%D0%B8%D1%80%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5%20%D1%80%D0%B5%D0%BF%D0%BE%D0%B7%D0%B8%D1%82%D0%BE%D1%80%D0%B8%D1%8F&labelColor=white" alt="Git" height="35"/>
+
 ### Выбираем где будет располагаться скрипт, лучше всего вне сайта. И устанавливаем texture-provider
 ```bash
 git clone --branch new https://github.com/microwin7/GravitLauncher-TextureProvider.git texture-provider
@@ -88,32 +96,22 @@ git clone --branch new https://github.com/microwin7/GravitLauncher-TextureProvid
 ```bash
 cd texture-provider
 ```
-### Компиляция и запуск контейнеров php-fpm и nginx:
+<img src="https://img.shields.io/badge/docker-2496ED?style=for-the-badge&logo=docker&logoColor=2496ED&label=%D0%98%D0%BD%D0%B8%D1%86%D0%B8%D0%B0%D0%BB%D0%B8%D0%B7%D0%B0%D1%86%D0%B8%D1%8F%20%D0%BA%D0%BE%D0%BD%D1%82%D0%B5%D0%B9%D0%BD%D0%B5%D1%80%D0%BE%D0%B2&labelColor=white" alt="Docker" height="35"/>
+
+### Скачивание слоёв, компиляция и запуск контейнеров php-fpm и nginx:
 ```bash
-docker compose -f docker-compose.yml up -d --build
-```
-### Настройка прав доступа для Хранилища (ОБЯЗАТЕЛЬНО):
-```bash
-docker compose -f docker-compose.yml exec php-fpm chown -R www-data:www-data storage
+docker compose up -d --build
 ```
 ### Остановка контейнеров:
 ```bash
-docker compose -f docker-compose.yml stop
+docker compose stop
 ```
 ### Запуск контейнеров / Перезапуск (если изменился файл docker-compose.yml):
 ```bash
-docker compose -f docker-compose.yml up -d
+docker compose up -d
 ```
-### Если у вас своя папка storage
-- Удалите текущую папку storage
-```bash
-rm -rf storage
-```
-- Создайте ссылку на папку storage. ПРИМЕР для Azuriom:
-```bash
-ln -s /var/www/html/Azuriom_SITE/storage/app/public storage
-```
-### Настройка nginx на вашем хосте:
+### <img src="https://img.shields.io/badge/NGINX-009639?style=for-the-badge&logo=nginx&logoColor=009639&label=%D0%9D%D0%90%D0%A1%D0%A2%D0%A0%D0%9E%D0%99%D0%9A%D0%90%20%D0%B2&labelColor=white" alt="NGINX" height="35"/>
+
 #### Для установки на сайт:
 - Над разделом server {...}
 ```nginx
@@ -152,19 +150,15 @@ server {
 ```bash
 service nginx restart
 ```
-## Установка через Composer:
+## Использование Composer | ❗❗❗ Не рекомендуется для неопытных пользователей ❗❗❗
+<img src="https://img.shields.io/badge/composer-F28D1A?style=for-the-badge&logo=packagist&logoColor=gray&label=Packagist&labelColor=white" alt="Composer" height="50"/>
+
 - Composer [Ссылка на иструкцию по установке Composer](https://getcomposer.org/download/)
+- ❗❗❗ **Для использования у вас уже должен быть установлен php со всеми необходимыми модулями**
 ```bash
 composer create-project microwin7/texture-provider
 ```
-## Установка через git:
-- Composer [Ссылка на иструкцию по установке Composer](https://getcomposer.org/download/)
-```bash
-git clone --branch new https://github.com/microwin7/GravitLauncher-TextureProvider.git texture-provider
-```
-```bash
-cd texture-provider
-```
+- Для инициализации всех пакетов, используется команда:
 ```bash
 composer install
 ```
@@ -232,6 +226,15 @@ composer install
 - Путь до корня сайта или texture-provider'a в конфиге `.env` константа: **ROOT_FOLDER**. По умолчанию: /var/www/html
 ## Хранилище текстур
 - Хранилище от корня сайта в конфиге `.env`: **STORAGE_DIR**. По умолчанию: storage
+### Если у вас своя папка storage
+  - Удалите текущую папку storage
+  ```bash
+  rm -rf storage
+  ```
+  - Создайте ссылку на папку storage. ПРИМЕР для Azuriom:
+  ```bash
+  ln -s /var/www/html/Azuriom_SITE/storage/app/public storage
+  ```
 - Пути от корня хранилища в конфиге `.env`: **TEXTURE_{ТИП_ТЕКСТУРЫ}_PATH**. Примеры есть в `.env.example`
 ### Для включения поддержки версий 5.2.9-5.4.x
 - Включите изменение хеша для старых версий в `.env`: **LEGACY_DIGEST**
