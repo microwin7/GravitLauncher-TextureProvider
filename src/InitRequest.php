@@ -64,12 +64,12 @@ class InitRequest
             );
             $r->addRoute(
                 HTTP::GET->name,
-                '/{' . ResponseTypeEnum::getNameRequestVariable() . ':(?:AVATAR)}/{size:(?:[0-9]{2,3})}/{login:(?:[0-9]+|\w{2,16}|[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}|[0-9a-f]{32}|[0-9a-f]{40}|[0-9a-f]{64})}[{timestamp:(?:\?t=[0-9]{1,11}|\&t=[0-9]{1,11})}]',
+                '/{' . ResponseTypeEnum::getNameRequestVariable() . ':(?:AVATAR|FRONT)}/{size:(?:[0-9]{2,3})}/{login:(?:[0-9]+|\w{2,16}|[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}|[0-9a-f]{32}|[0-9a-f]{40}|[0-9a-f]{64})}[{timestamp:(?:\?t=[0-9]{1,11}|\&t=[0-9]{1,11})}]',
                 'returner'
             );
             $r->addRoute(
                 HTTP::GET->name,
-                '/{' . ResponseTypeEnum::getNameRequestVariable() . ':(?:AVATAR)}/{login:(?:[0-9]+|\w{2,16}|[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}|[0-9a-f]{32}|[0-9a-f]{40}|[0-9a-f]{64})}[{timestamp:(?:\?t=[0-9]{1,11}|\&t=[0-9]{1,11})}]',
+                '/{' . ResponseTypeEnum::getNameRequestVariable() . ':(?:AVATAR|FRONT)}/{login:(?:[0-9]+|\w{2,16}|[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}|[0-9a-f]{32}|[0-9a-f]{40}|[0-9a-f]{64})}[{timestamp:(?:\?t=[0-9]{1,11}|\&t=[0-9]{1,11})}]',
                 'returner'
             );
             $r->addRoute(
@@ -145,18 +145,19 @@ class InitRequest
                     if ($size > Config::BOUND_WIDTH_CANVAS()) $size = Config::BLOCK_CANVAS();
                     switch ($this->requestParams->responseType) {
                         case ResponseTypeEnum::AVATAR:
+                        case ResponseTypeEnum::FRONT:
                             /** @var string $this->requestParams->login */
-                            $filename = Texture::PATH($this->requestParams->responseType, $this->requestParams->login);
-                            Cache::removeCacheFiles($this->requestParams->responseType);
-                            if (!Cache::cacheValid($filename, $size)) {
-                                [$image, $_, $_, $fraction] = GDUtils::pre_calculation(TextureProvider::getSkinDataForAvatar($this->requestParams->login));
+                            $filename = Texture::PATH($this->requestParams->responseType, $this->requestParams->login, Texture::EXTENSTION(), $size);
+                            Cache::removeCacheFiles($this->requestParams->responseType, $size);
+                            if (!Cache::cacheValid($filename)) {
                                 Cache::saveCacheFile(
                                     $this->requestParams->login,
-                                    GDUtils::avatar([$image, $fraction], $size),
-                                    $this->requestParams->responseType
+                                    GDUtils::{strtolower($this->requestParams->responseType->name)}(GDUtils::pre_calculation(TextureProvider::getSkinDataForAvatar($this->requestParams->login)), $size),
+                                    $this->requestParams->responseType,
+                                    $size
                                 );
                             }
-                            TextureProvider::ResponseTexture(Cache::loadCacheFile($filename));
+                            TextureProvider::ResponseTexture(Cache::loadCacheFile($filename), Cache::getLastModified($filename));
                             break;
                         default:
                             TextureProvider::ResponseTexture(null);

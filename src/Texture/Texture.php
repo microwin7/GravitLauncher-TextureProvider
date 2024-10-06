@@ -12,6 +12,7 @@ define('FILE_MOVE_FAILED', 'Произошла ошибка перемещени
 define('FILE_NOT_UPLOADED', 'Файл не был загружен!');
 
 use stdClass;
+use Carbon\Carbon;
 use JsonSerializable;
 use Microwin7\PHPUtils\Main;
 use Microwin7\TextureProvider\Config;
@@ -24,7 +25,9 @@ use Microwin7\TextureProvider\Texture\Skin;
 use Psr\Http\Message\UploadedFileInterface;
 use Microwin7\TextureProvider\Utils\GDUtils;
 use Microwin7\PHPUtils\DB\SingletonConnector;
+use Symfony\Component\HttpFoundation\Request;
 use Microwin7\TextureProvider\Utils\LuckPerms;
+use Symfony\Component\HttpFoundation\Response;
 use Microwin7\PHPUtils\Utils\Texture as TextureUtils;
 use Microwin7\PHPUtils\Exceptions\FileSystemException;
 use Microwin7\PHPUtils\Exceptions\FileUploadException;
@@ -362,7 +365,7 @@ class Texture implements JsonSerializable
                         TRUE => implode('/', array_filter(
                             [
                                 ResponseTypeEnum::AVATAR->name,
-                                Config::AVATAR_CANVAS(),
+                                Config::AVATAR_CANVAS() ?? Config::BLOCK_CANVAS(),
                                 $this->skinID ?? 'DEFAULT'
                             ],
                             function ($v) {
@@ -372,7 +375,28 @@ class Texture implements JsonSerializable
                         FALSE => 'index.php?' . http_build_query(
                             [
                                 ResponseTypeEnum::getNameRequestVariable() => ResponseTypeEnum::AVATAR->name,
-                                'size' => Config::AVATAR_CANVAS(),
+                                'size' => Config::AVATAR_CANVAS() ?? Config::BLOCK_CANVAS(),
+                                'login' => $this->skinID ?? 'DEFAULT',
+                            ]
+                        ),
+                    },
+                ];
+                $json[ResponseTypeEnum::FRONT->name] = [
+                    'url' => Main::getScriptURL() . match (Config::ROUTERING()) {
+                        TRUE => implode('/', array_filter(
+                            [
+                                ResponseTypeEnum::FRONT->name,
+                                Config::BLOCK_CANVAS(),
+                                $this->skinID ?? 'DEFAULT'
+                            ],
+                            function ($v) {
+                                return $v !== null;
+                            }
+                        )),
+                        FALSE => 'index.php?' . http_build_query(
+                            [
+                                ResponseTypeEnum::getNameRequestVariable() => ResponseTypeEnum::FRONT->name,
+                                'size' => Config::BLOCK_CANVAS(),
                                 'login' => $this->skinID ?? 'DEFAULT',
                             ]
                         ),
@@ -387,13 +411,42 @@ class Texture implements JsonSerializable
     {
         return $this->toArray();
     }
-    public static function ResponseTexture(string|null $data): never
+    public static function ResponseTexture(string|null $CONTENT, int|null $lastModified = null): never
     {
-        if ($data == null) {
+        if ($CONTENT == null) {
             http_response_code(404);
             exit;
         }
-        header("Content-type: image/png");
-        die($data);
+        $request = Request::createFromGlobals();
+        $response = new Response();
+        $max_age = Config::IMAGE_CACHE_TIME();
+        if ($max_age === null) {
+            $max_age = match (Config::USER_STORAGE_TYPE()) {
+                UserStorageTypeEnum::DB_SHA1, UserStorageTypeEnum::DB_SHA256 => 604800,
+                default => 60
+            };
+        }
+        // Установка заголовков
+        $response->headers->set('Content-Type', 'image/png');
+        $response->headers->set('Content-Length', (string) strlen($CONTENT));
+        $response->setLastModified(Carbon::createFromTimestamp($lastModified ?? time()));
+        $response->setETag(hash('sha256', $CONTENT));
+        $response->setPublic();
+        $response->setMaxAge($max_age);
+        match (Config::USER_STORAGE_TYPE()) {
+            UserStorageTypeEnum::DB_SHA1, UserStorageTypeEnum::DB_SHA256 => $response->setImmutable(),
+            default => null
+        };
+        $response->headers->set('Expires', Carbon::now('UTC')->addSeconds($max_age)->toRfc7231String());
+        $response->headers->set('Accept-Ranges', 'bytes');
+        // Проверка, изменился ли ресурс
+        if ($response->isNotModified($request)) {
+            $response->setNotModified();
+        } else {
+            $response->setContent($CONTENT);
+        }
+        // Отправка ответа
+        $response->send();
+        exit;
     }
 }

@@ -7,6 +7,7 @@ namespace Microwin7\TextureProvider\Texture\Storage;
 use TypeError;
 use Microwin7\TextureProvider\Config;
 use Microwin7\PHPUtils\Helpers\FileSystem;
+use Microwin7\TextureProvider\Utils\Cache;
 use Microwin7\TextureProvider\Utils\GDUtils;
 use Microwin7\TextureProvider\Texture\Texture;
 use Microwin7\PHPUtils\Utils\Texture as UtilsTexture;
@@ -19,12 +20,14 @@ use Microwin7\PHPUtils\Contracts\Texture\Enum\TextureStorageTypeEnum;
 class StorageType
 {
     public              ?string             $skinData = null;
+    public              ?int                $skinLastModified = null;
     /** @psalm-suppress PropertyNotSetInConstructor */
     public readonly     string              $skinUrl;
     /** @psalm-suppress PropertyNotSetInConstructor */
     public readonly     bool                $skinSlim;
 
     public              ?string             $capeData = null;
+    public              ?int                $capeLastModified = null;
     /** @psalm-suppress PropertyNotSetInConstructor */
     public readonly     string              $capeUrl;
 
@@ -38,9 +41,10 @@ class StorageType
     ) {
         $this->fileSystem = new FileSystem;
         if ($this->skinID !== null && in_array($responseType, [ResponseTypeEnum::JSON, ResponseTypeEnum::SKIN, ResponseTypeEnum::AVATAR])) {
-            if (!is_null($this->skinData = $this->getSkinData())) {
+            $this->getSkinData();
+            if ($this->skinData !== null) {
                 if ($responseType !== ResponseTypeEnum::JSON && $responseType !== ResponseTypeEnum::AVATAR) $this->skinResize();
-                if ($responseType === ResponseTypeEnum::SKIN) Texture::ResponseTexture($this->skinData);
+                if ($responseType === ResponseTypeEnum::SKIN) Texture::ResponseTexture($this->skinData, $this->skinLastModified);
                 if ($responseType !== ResponseTypeEnum::AVATAR) {
                     $this->skinUrl = $this->getSkinUrl($responseType);
                     $this->skinSlim = $this->checkIsSlim();
@@ -48,13 +52,14 @@ class StorageType
             }
         }
         if ($this->capeID !== null && in_array($responseType, [ResponseTypeEnum::JSON, ResponseTypeEnum::CAPE])) {
-            if (!is_null($this->capeData = $this->getCapeData())) {
-                if ($responseType === ResponseTypeEnum::CAPE) Texture::ResponseTexture($this->capeData);
+            $this->getCapeData();
+            if ($this->capeData !== null) {
+                if ($responseType === ResponseTypeEnum::CAPE) Texture::ResponseTexture($this->capeData, $this->capeLastModified);
                 $this->capeUrl = $this->getCapeUrl();
             }
         }
     }
-    private function getSkinData(): ?string
+    private function getSkinData(): void
     {
         /** @var string $this->skinID */
         if (Config::USER_STORAGE_TYPE() === UserStorageTypeEnum::USERNAME) {
@@ -67,14 +72,21 @@ class StorageType
                     $username = null;
                 }
                 if ($username !== null) {
-                    return file_get_contents(UtilsTexture::PATH(ResponseTypeEnum::SKIN, $this->skinID = $username));
+                    $filename = UtilsTexture::PATH(ResponseTypeEnum::SKIN, $this->skinID = $username);
+                    $this->skinData = file_get_contents($filename);
+                    $this->skinLastModified = Cache::getLastModified($filename);
                 } else {
-                    return null;
+                    // NULL
                 }
-            } else return file_get_contents($skinPath);
+            } else {
+                $this->skinData = file_get_contents($skinPath);
+                $this->skinLastModified = Cache::getLastModified($skinPath);
+            }
         } else {
-            return $this->fileSystem->is_file($skinPath = UtilsTexture::PATH(ResponseTypeEnum::SKIN, $this->skinID)) ?
-                file_get_contents($skinPath) : null;
+            if ($this->fileSystem->is_file($skinPath = UtilsTexture::PATH(ResponseTypeEnum::SKIN, $this->skinID))) {
+                $this->skinData = file_get_contents($skinPath);
+                $this->skinLastModified = Cache::getLastModified($skinPath);
+            }
         }
     }
     private function skinResize(): void
@@ -123,7 +135,7 @@ class StorageType
             ));
         }
     }
-    private function getCapeData(): ?string
+    private function getCapeData(): void
     {
         /** @var string $this->capeID */
         if (Config::USER_STORAGE_TYPE() === UserStorageTypeEnum::USERNAME) {
@@ -136,14 +148,21 @@ class StorageType
                     $username = null;
                 }
                 if ($username !== null) {
-                    return file_get_contents(UtilsTexture::PATH(ResponseTypeEnum::CAPE, $this->capeID = $username));
+                    $filename = UtilsTexture::PATH(ResponseTypeEnum::CAPE, $this->capeID = $username);
+                    $this->capeData = file_get_contents($filename);
+                    $this->capeLastModified = Cache::getLastModified($filename);
                 } else {
-                    return $username;
+                    // NULL
                 }
-            } else return file_get_contents($capePath);
+            } else {
+                $this->capeData = file_get_contents($capePath);
+                $this->capeLastModified = Cache::getLastModified($capePath);
+            }
         } else {
-            return $this->fileSystem->is_file($capePath = UtilsTexture::PATH(ResponseTypeEnum::CAPE, $this->capeID)) ?
-                file_get_contents($capePath) : null;
+            if ($this->fileSystem->is_file($capePath = UtilsTexture::PATH(ResponseTypeEnum::CAPE, $this->capeID))) {
+                $this->capeData = file_get_contents($capePath);
+                $this->capeLastModified = Cache::getLastModified($capePath);
+            }
         }
     }
     private function getCapeUrl(): string

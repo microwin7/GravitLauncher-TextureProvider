@@ -41,9 +41,10 @@ class IndexSkinRandomCollection
         return count($files);
     }
     /** 
-     * @throw NeedRe_GenerateCache;
+     * @throw NeedRe_GenerateCache
+     * @return array{0: string, 1: int}|null - данные и время модификации
      */
-    public function getDataFromUUID(string $uuid): ?string
+    public function getDataFromUUID(string $uuid): ?array
     {
         try {
             $uuiddec = hexdec(substr($uuid, -12));
@@ -53,10 +54,11 @@ class IndexSkinRandomCollection
                 if (($count = count($fileData)) > 0) {
                     $modulo = $uuiddec % $count;
                     $index = $fileData[$modulo];
-                    ($data = file_get_contents(Texture::TEXTURE_STORAGE_FULL_PATH(TextureStorageTypeEnum::COLLECTION) . $index->file)) !== false ?: throw new NeedRe_GenerateCache;
+                    $filename = Texture::TEXTURE_STORAGE_FULL_PATH(TextureStorageTypeEnum::COLLECTION) . $index->file;
+                    ($data = file_get_contents($filename)) !== false ?: throw new NeedRe_GenerateCache;
                     $hash = Texture::digest($data);
                     if ($index->hash !== $hash) throw new NeedRe_GenerateCache;
-                    return $data;
+                    return [$data, Cache::getLastModified($filename)];
                 }
             }
         } catch (NeedRe_GenerateCache) {

@@ -3,6 +3,8 @@
 namespace Microwin7\PHPUtils\Exceptions\Handler;
 
 use Microwin7\PHPUtils\Main;
+use Composer\InstalledVersions;
+use Microwin7\PHPUtils\Security\BearerToken;
 use Microwin7\PHPUtils\Response\JsonResponse;
 use Microwin7\PHPUtils\Exceptions\FileUploadException;
 use Microwin7\PHPUtils\Exceptions\TextureSizeException;
@@ -15,7 +17,26 @@ class ExceptionHandler
 {
     public function __construct()
     {
-        if (Main::SENTRY_ENABLE()) \Sentry\init(['dsn' => Main::SENTRY_DSN()]);
+        if (Main::SENTRY_ENABLE()) {
+            \Sentry\init(['dsn' => Main::SENTRY_DSN()]);
+            \Sentry\configureScope(function (\Sentry\State\Scope $scope): void {
+                $scope->setContext('application', [
+                    'url' => Main::getApplicationURL()
+                ]);
+            });
+            \Sentry\SentrySdk::getCurrentHub()->configureScope(function (\Sentry\State\Scope $scope) {
+                $packages = function (): array {
+                    $packages = [];
+                
+                    foreach (InstalledVersions::getInstalledPackages() as $package) {
+                        $packages[$package] = InstalledVersions::getPrettyVersion($package);
+                    }
+                
+                    return $packages;
+                };
+                $scope->setContext('composer_packages', $packages());
+            });
+        }
         /**
          * Sets a user-defined exception handler function
          */
@@ -36,8 +57,25 @@ class ExceptionHandler
             // libsodium is required but not available.
         }
         if ($e instanceof \Firebase\JWT\SignatureInvalidException) {
-            if (Main::SENTRY_ENABLE()) \Sentry\captureException($e);
-            $this->error('Неправильная сигнатура публичного ключа');
+            $message = 'Неправильная сигнатура публичного ключа. Проверьте настройку environment: LAUNCH_SERVER_ECDSA256_PUBLIC_KEY_BASE64';
+            if (Main::SENTRY_ENABLE()) {
+                $authorization = BearerToken::getBearerToken() ?? '';
+                $JWT_DATA = [];
+                // Используем регулярное выражение для извлечения второй части JWT токена
+                if (preg_match('/(.*)\.(.*)\.(.*)$/', $authorization, $matches)) {
+                    /** @var array{string: string} */
+                    $JWT_DATA = json_decode(base64_decode($matches[2]) ?: '{}', true) ?: [];
+                }
+                \Sentry\addBreadcrumb(new \Sentry\Breadcrumb(
+                    \Sentry\Breadcrumb::LEVEL_INFO,
+                    \Sentry\Breadcrumb::TYPE_HTTP,
+                    'JWT_DATA',
+                    '',
+                    $JWT_DATA
+                ));
+                \Sentry\captureMessage($message, \Sentry\Severity::fatal());
+            }
+            $this->error($message);
             // provided JWT signature verification failed.
         }
         if ($e instanceof \Firebase\JWT\BeforeValidException) {
@@ -51,8 +89,9 @@ class ExceptionHandler
             // provided JWT is trying to be used after "exp" claim.
         }
         if ($e instanceof \UnexpectedValueException) {
-            if (Main::SENTRY_ENABLE()) \Sentry\captureException($e);
-            $this->error('UnexpectedValueException');
+            $message = 'Ваш текущий тип AuthCoreProvider не поддерживает JWT токены, необходимый для авторизации при использовании API';
+            if (Main::SENTRY_ENABLE()) \Sentry\captureMessage($message, \Sentry\Severity::fatal());
+            $this->error($message);
             // provided JWT is malformed OR
             // provided JWT is missing an algorithm / using an unsupported algorithm OR
             // provided JWT algorithm does not match provided key OR

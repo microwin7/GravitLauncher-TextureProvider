@@ -16,6 +16,7 @@ use Microwin7\PHPUtils\Contracts\Texture\Enum\TextureStorageTypeEnum;
 class CollectionType
 {
     public              ?string             $skinData = null;
+    public              ?int                $skinLastModified = null;
     /** @psalm-suppress PropertyNotSetInConstructor */
     public readonly     string              $skinUrl;
     /** @psalm-suppress PropertyNotSetInConstructor */
@@ -30,9 +31,10 @@ class CollectionType
         ResponseTypeEnum    $responseType
     ) {
         $this->index = new IndexSkinRandomCollection;
-        if (!is_null($this->skinData = $this->getSkinData())) {
+        $this->getSkinData();
+        if ($this->skinData !== null) {
             if ($responseType !== ResponseTypeEnum::JSON && $responseType !== ResponseTypeEnum::AVATAR) $this->skinResize();
-            if ($responseType === ResponseTypeEnum::SKIN) Texture::ResponseTexture($this->skinData);
+            if ($responseType === ResponseTypeEnum::SKIN) Texture::ResponseTexture($this->skinData, $this->skinLastModified);
             $this->skinUrl = $this->getSkinUrl();
             $this->skinSlim = $this->checkIsSlim();
         }
@@ -40,9 +42,9 @@ class CollectionType
         $this->capeData = null;
         $this->capeUrl = '';
     }
-    private function getSkinData(): ?string
+    private function getSkinData(): void
     {
-        return $this->index->getDataFromUUID($this->uuid);
+        [$this->skinData, $this->skinLastModified] = $this->index->getDataFromUUID($this->uuid);
     }
     private function skinResize(): void
     {
