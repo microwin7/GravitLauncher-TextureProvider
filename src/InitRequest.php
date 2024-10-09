@@ -2,9 +2,11 @@
 
 namespace Microwin7\TextureProvider;
 
+use Microwin7\PHPUtils\Main;
 use FastRoute\ConfigureRoutes;
 use GuzzleHttp\Psr7\ServerRequest;
 use Microwin7\PHPUtils\Utils\Path;
+use Microwin7\PHPUtils\Rules\Regex;
 use Microwin7\PHPUtils\Utils\Texture;
 use Microwin7\TextureProvider\Config;
 use FastRoute\Dispatcher\Result\Matched;
@@ -15,8 +17,11 @@ use Psr\Http\Message\UploadedFileInterface;
 use Microwin7\PHPUtils\Security\BearerToken;
 use Microwin7\TextureProvider\Utils\GDUtils;
 use Microwin7\PHPUtils\Response\JsonResponse;
-use Microwin7\TextureProvider\Data\UserDataFromJWT;
+use Microwin7\PHPUtils\Attributes\AsArguments;
 use FastRoute\Dispatcher\Result\MethodNotAllowed;
+use Microwin7\PHPUtils\Attributes\RegexArguments;
+use Microwin7\PHPUtils\Request\RequiredArguments;
+use Microwin7\TextureProvider\Data\UserDataFromJWT;
 use Microwin7\PHPUtils\Contracts\Component\Enum\HTTP;
 use Microwin7\PHPUtils\Exceptions\FileUploadException;
 use Microwin7\PHPUtils\Contracts\Texture\Enum\MethodTypeEnum;
@@ -27,7 +32,6 @@ use Microwin7\PHPUtils\Exceptions\RequiredArgumentMissingException;
 use Microwin7\PHPUtils\Contracts\Texture\Enum\TextureStorageTypeEnum;
 use Microwin7\TextureProvider\Request\Loader\RequestParams as RequestParamsLoader;
 use Microwin7\TextureProvider\Request\Provider\RequestParams as RequestParamsProvider;
-use function Microwin7\PHPUtils\ar_slash_string;
 
 class InitRequest
 {
@@ -82,6 +86,11 @@ class InitRequest
                 '/upload/{' . ResponseTypeEnum::getNameRequestVariable() . ':(?:SKIN|1|CAPE|2)}',
                 'upload'
             );
+            $r->addRoute(
+                HTTP::POST->name,
+                '/api/upload/{' . ResponseTypeEnum::getNameRequestVariable() . ':(?:SKIN|1|CAPE|2)}',
+                'upload_api'
+            );
         });
 
         /**
@@ -123,6 +132,8 @@ class InitRequest
                             )
                         );
                     } else throw new FileUploadException(UPLOAD_ERR_NO_FILE);
+                case 'upload_api':
+                    $this->upload_api();
                 case 'returner':
                     try {
                         $this->requestParams = RequestParams::fromRouteReturner($this->routeInfo->variables);
@@ -148,11 +159,13 @@ class InitRequest
                         case ResponseTypeEnum::FRONT:
                             /** @var string $this->requestParams->login */
                             $filename = Texture::PATH($this->requestParams->responseType, $this->requestParams->login, Texture::EXTENSTION(), $size);
-                            Cache::removeCacheFiles($this->requestParams->responseType, $size);
-                            if (!Cache::cacheValid($filename)) {
+                            if (!file_exists($filename)) {
                                 Cache::saveCacheFile(
                                     $this->requestParams->login,
-                                    GDUtils::{strtolower($this->requestParams->responseType->name)}(GDUtils::pre_calculation(TextureProvider::getSkinDataForAvatar($this->requestParams->login)), $size),
+                                    GDUtils::{strtolower($this->requestParams->responseType->name)}(
+                                        GDUtils::pre_calculation(TextureProvider::getSkinDataForAvatar($this->requestParams->login)),
+                                        $size
+                                    ),
                                     $this->requestParams->responseType,
                                     $size
                                 );
@@ -171,5 +184,39 @@ class InitRequest
         if ($this->routeInfo instanceof NotMatched || $this->routeInfo instanceof MethodNotAllowed) {
             TextureProvider::ResponseTexture(null);
         }
+    }
+    #[AsArguments(whereSearch: HTTP::POST, required: ['username', 'uuid'], optional: ['hd_allow'])]
+    #[RegexArguments('username', Regex::USERNAME)]
+    #[RegexArguments('uuid', Regex::UUIDv1_AND_v4)]
+    #[RegexArguments('hd_allow', Regex::BOOLEAN_REGXP)]
+    private function upload_api(): void
+    {
+        if (Main::BEARER_TOKEN() === null) throw new \RuntimeException('Обращение к API без включения проверки по Bearer токену недопустимо');
+        new BearerToken;
+
+        /**
+         * @var string $args->username
+         * @var string $args->uuid
+         * @var bool|null $args->hd_allow
+         */
+        $args = new RequiredArguments(new \ReflectionMethod(static::class, __FUNCTION__));
+
+
+        if (isset($_FILES['file'])) {
+            /** @var UploadedFileInterface */
+            $file = ServerRequest::normalizeFiles($_FILES)['file'];
+            JsonResponse::response(
+                TextureProvider::loadTexture(
+                    /** AutoInit ResponseTypeEnum from request, validate after only SKIN or CAPE */
+                    (RequestParamsLoader::fromRoute($this->routeInfo->variables))
+                        /** Variable username for UserStorageTypeEnum::USERNAME in Config::USER_STORAGE_TYPE */
+                        ->setVariable('username', $args->username)
+                        /** Variable uuid for other enum types in Config::USER_STORAGE_TYPE */
+                        ->setVariable('uuid', $args->uuid),
+                    $file,
+                    (null !== $args->hd_allow ? $args->hd_allow : Config::HD_TEXTURES_ALLOW())
+                )
+            );
+        } else throw new FileUploadException(UPLOAD_ERR_NO_FILE);
     }
 }

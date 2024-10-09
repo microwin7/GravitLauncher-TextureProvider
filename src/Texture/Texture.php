@@ -20,6 +20,7 @@ use Microwin7\PHPUtils\DB\SubDBTypeEnum;
 use Microwin7\TextureProvider\Data\User;
 use Microwin7\PHPUtils\Configs\MainConfig;
 use Microwin7\PHPUtils\Helpers\FileSystem;
+use Microwin7\TextureProvider\Utils\Cache;
 use Microwin7\TextureProvider\Texture\Cape;
 use Microwin7\TextureProvider\Texture\Skin;
 use Psr\Http\Message\UploadedFileInterface;
@@ -220,7 +221,7 @@ class Texture implements JsonSerializable
         if ($storageType->skinData !== null) return $storageType->skinData;
         else self::ResponseTexture(null);
     }
-    public static function loadTexture(RequestParams|LoaderRequestParams $requestParams, UploadedFileInterface $uploadedFile, bool $hdAllow = false): Skin|Cape
+    public static function loadTexture(RequestParams|LoaderRequestParams $requestParams, UploadedFileInterface $uploadedFile, bool $hd_allow = false): Skin|Cape
     {
         if (!in_array($requestParams->responseType, [ResponseTypeEnum::SKIN, ResponseTypeEnum::CAPE]))
             throw new \ValueError(sprintf(
@@ -250,7 +251,14 @@ class Texture implements JsonSerializable
 
         try {
             TextureUtils::validateHDSize($w, $h, $requestParams->responseType);
-            if ((Config::LUCKPERMS_USE_PERMISSION_HD_SKIN() && (new LuckPerms($requestParams))->getUserWeight() < Config::LUCKPERMS_MIN_WEIGHT()) && !$hdAllow) {
+            if (Config::LUCKPERMS_USE_PERMISSION_HD_SKIN() && !$hd_allow) {
+                if ((new LuckPerms($requestParams))->getUserWeight() < Config::LUCKPERMS_MIN_WEIGHT()) {
+                    match ($requestParams->responseType) {
+                        ResponseTypeEnum::SKIN => throw new TextureLoaderException(NO_HD_SKIN_PERMISSION),
+                        ResponseTypeEnum::CAPE => throw new TextureLoaderException(NO_HD_CAPE_PERMISSION),
+                    };
+                }
+            } else if (!$hd_allow) {
                 match ($requestParams->responseType) {
                     ResponseTypeEnum::SKIN => throw new TextureLoaderException(NO_HD_SKIN_PERMISSION),
                     ResponseTypeEnum::CAPE => throw new TextureLoaderException(NO_HD_CAPE_PERMISSION),
@@ -298,6 +306,7 @@ class Texture implements JsonSerializable
                 }
             );
         }
+        Cache::resetUserCachedFiles($requestParams->responseType, $requestParams->login);
         return $texture;
     }
     public static function generateTextureFromLoaderRequestParams(RequestParams|LoaderRequestParams $requestParams, string $data, \GdImage $gdImage): Skin|Cape
@@ -431,7 +440,7 @@ class Texture implements JsonSerializable
         $response->headers->set('Content-Length', (string) strlen($CONTENT));
         $response->setLastModified(Carbon::createFromTimestamp($lastModified ?? time()));
         $response->setETag(hash('sha256', $CONTENT));
-        $response->setPublic();
+        $response->setPrivate();
         $response->setMaxAge($max_age);
         match (Config::USER_STORAGE_TYPE()) {
             UserStorageTypeEnum::DB_SHA1, UserStorageTypeEnum::DB_SHA256 => $response->setImmutable(),

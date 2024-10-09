@@ -3,7 +3,6 @@
 namespace Microwin7\TextureProvider\Utils;
 
 use Microwin7\PHPUtils\Utils\Texture;
-use Microwin7\TextureProvider\Config;
 use Microwin7\PHPUtils\Helpers\FileSystem;
 use Microwin7\PHPUtils\Contracts\Texture\Enum\ResponseTypeEnum;
 use Microwin7\PHPUtils\Exceptions\FileSystemException;
@@ -27,29 +26,52 @@ class Cache
     {
         return lstat($filename)['ctime'];
     }
-    public static function removeCacheFiles(ResponseTypeEnum $responseType, ?int $size): void
+    /**
+     * @param ResponseTypeEnum::SKIN|ResponseTypeEnum::CAPE $responseType
+     */
+    public static function resetUserCachedFiles(ResponseTypeEnum $responseType, string $login): void
     {
-        if (Config::IMAGE_CACHE_TIME() !== null) {
-            $path = Texture::TEXTURE_STORAGE_FULL_PATH($responseType, $size);
-            try {
-                foreach ((new FileSystem)->findFiles(Texture::TEXTURE_STORAGE_FULL_PATH($responseType, $size), Texture::EXTENSTION(), 0) as $file) {
-                    /** @psalm-suppress PossiblyNullOperand */
-                    if (time() - lstat($file)['ctime'] > Config::IMAGE_CACHE_TIME() * 2) {
-                        unlink($file);
+        if ($responseType === ResponseTypeEnum::SKIN) {
+            foreach (
+                [
+                    ResponseTypeEnum::AVATAR,
+                    ResponseTypeEnum::FRONT,
+                    ResponseTypeEnum::FRONT_WITH_CAPE,
+                    ResponseTypeEnum::BACK,
+                    ResponseTypeEnum::BACK_WITH_CAPE
+                ] as $type
+            ) {
+                try {
+                    foreach ((new FileSystem)->findFiles(Texture::TEXTURE_STORAGE_FULL_PATH($type), Texture::EXTENSTION(), 1) as $file) {
+                        if (pathinfo($file, PATHINFO_BASENAME) === ($login . Texture::EXTENSTION())) {
+                            unlink($file);
+                        }
                     }
+                } catch (FileSystemException $e) {
+                    if (!$e->isErrorFolderNotExist()) throw $e;
                 }
-            } catch (FileSystemException $e) {
-                if ($e->isErrorFolderNotExist()) FileSystem::mkdir($path);
             }
         }
-    }
-    public static function cacheValid(string $filename): bool
-    {
-        if (!file_exists($filename)) return false;
-        if (Config::IMAGE_CACHE_TIME() === null) return true;
-        $time = filemtime($filename);
-        /** @psalm-suppress PossiblyNullOperand */
-        if ($time <= time() - 1 * Config::IMAGE_CACHE_TIME()) return false;
-        return true;
+        if ($responseType === ResponseTypeEnum::CAPE) {
+            foreach (
+                [
+                    ResponseTypeEnum::FRONT_CAPE,
+                    ResponseTypeEnum::FRONT_WITH_CAPE,
+                    ResponseTypeEnum::BACK,
+                    ResponseTypeEnum::BACK_WITH_CAPE,
+                    ResponseTypeEnum::CAPE_RESIZE
+                ] as $type
+            ) {
+                try {
+                    foreach ((new FileSystem)->findFiles(Texture::TEXTURE_STORAGE_FULL_PATH($type), Texture::EXTENSTION(), 1) as $file) {
+                        if (pathinfo($file, PATHINFO_BASENAME) === ($login . Texture::EXTENSTION())) {
+                            unlink($file);
+                        }
+                    }
+                } catch (FileSystemException $e) {
+                    if (!$e->isErrorFolderNotExist()) throw $e;
+                }
+            }
+        }
     }
 }
