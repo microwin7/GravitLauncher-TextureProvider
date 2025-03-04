@@ -7,14 +7,14 @@
         "ext-gd": "*",
         "ext-mbstring": "*",
         "ext-json": "*",
-        "microwin7/php-utils": "1.7.1.3",
-        "symfony/console": "^7.0",
-        "sentry/sentry": "^4.6",
-        "firebase/php-jwt": "^6.10",
-        "nesbot/carbon": "^3.3",
-        "guzzlehttp/psr7": "^2.6",
+        "microwin7/php-utils": "1.7.1.4",
+        "symfony/console": "^7.3.x-dev",
+        "sentry/sentry": "^4.10",
+        "firebase/php-jwt": "^6.11",
+        "nesbot/carbon": "^3.x-dev",
+        "guzzlehttp/psr7": "2.7.x-dev",
         "nikic/fast-route": "^2.0@dev",
-        "symfony/http-foundation": "7.2.x-dev"
+        "symfony/http-foundation": "7.3.x-dev"
     },
     "license": "GPL-3.0-or-later",
     "autoload": {
@@ -35,7 +35,7 @@
     ],
     "minimum-stability": "dev",
     "require-dev": {
-        "vimeo/psalm": "5.x-dev"
+        "vimeo/psalm": "6.8.8"
     },
     "bin": [
         "bin/index",
