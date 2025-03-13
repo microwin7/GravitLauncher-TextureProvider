@@ -7,7 +7,7 @@
         "ext-gd": "*",
         "ext-mbstring": "*",
         "ext-json": "*",
-        "microwin7/php-utils": "1.7.1.4",
+        "microwin7/php-utils": "1.7.1.5",
         "symfony/console": "^7.3.x-dev",
         "sentry/sentry": "^4.10",
         "firebase/php-jwt": "^6.11",
