@@ -1,7 +1,4 @@
 <?php
-
-use Microwin7\PHPUtils\Rules\Regex;
-
 require_once(__DIR__ . '/../../vendor/autoload.php');
 
 $http_env_vendor = getenv('ENV_VENDOR');
@@ -11,7 +8,7 @@ else $env_filename = '.env';
 
 if (($env_lines = file(__DIR__ . '/../../' . $env_filename, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES)) !== false) {
     $finalLines = array_filter($env_lines, function ($line) {
-        return Regex::valid_with_pattern($line, '/^([A-Z0-9\_]+)=(.*?)$/');
+        return \Microwin7\PHPUtils\Rules\Regex::valid_with_pattern($line, \Microwin7\PHPUtils\Rules\Regex::ENV_NAME);
     });
     foreach ($finalLines as $line) {
         preg_match('/^([A-Z0-9\_]+)=.*?$/', $line, $matches);

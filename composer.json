@@ -7,7 +7,7 @@
         "ext-gd": "*",
         "ext-mbstring": "*",
         "ext-json": "*",
-        "microwin7/php-utils": "1.7.1.5",
+        "microwin7/php-utils": "1.8.0.0",
         "symfony/console": "^7.3.x-dev",
         "sentry/sentry": "^4.10",
         "firebase/php-jwt": "^6.11",
@@ -35,7 +35,7 @@
     ],
     "minimum-stability": "dev",
     "require-dev": {
-        "vimeo/psalm": "6.8.8"
+        "vimeo/psalm": "6.9.3.0"
     },
     "bin": [
         "bin/index",

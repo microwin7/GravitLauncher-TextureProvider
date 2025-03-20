@@ -41,7 +41,7 @@ class MigrationToHash extends Command
         $this->fileSystem = new FileSystem;
         parent::__construct();
     }
-
+    #[\Override]
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         if ($this->io === null) $this->io = new InputOutput($input, $output);
@@ -120,10 +120,10 @@ class MigrationToHash extends Command
                     
                     try {
                         Texture::validateHDSize($w, $h, $this->selectedMode);
-                    } catch (TextureSizeHDException $e) {
+                    } catch (TextureSizeHDException) {
                         try {
                             Texture::validateSize($w, $h, $this->selectedMode);
-                        } catch (TextureSizeException $e) {
+                        } catch (TextureSizeException) {
                             $textureSizeInvalidListMessage[] =
                                 sprintf('Текстура: %s не соответствует разрешённым размерам. Обнаружен размер: %ux%u', $loginTexture . Texture::EXTENSTION(), $w, $h);
                             $not_valid_texture++;
@@ -158,7 +158,7 @@ class MigrationToHash extends Command
         }
         exit(Command::SUCCESS);
     }
-
+    #[\Override]
     protected function configure(): void
     {
         $this->addOption(

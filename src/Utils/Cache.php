@@ -3,9 +3,10 @@
 namespace Microwin7\TextureProvider\Utils;
 
 use Microwin7\PHPUtils\Utils\Texture;
+use Microwin7\TextureProvider\Config;
 use Microwin7\PHPUtils\Helpers\FileSystem;
-use Microwin7\PHPUtils\Contracts\Texture\Enum\ResponseTypeEnum;
 use Microwin7\PHPUtils\Exceptions\FileSystemException;
+use Microwin7\PHPUtils\Contracts\Texture\Enum\ResponseTypeEnum;
 
 /** ПЕРЕПИСАТЬ */
 class Cache
@@ -73,5 +74,13 @@ class Cache
                 }
             }
         }
+    }
+    public static function expireCheckValid(string $filename): bool
+    {
+        if (!file_exists($filename)) return true;
+        if (Config::IMAGE_CACHE_TIME() === null) return true;
+        $time = filemtime($filename);
+        if ($time <= time() - 1 * Config::IMAGE_CACHE_TIME()) return false;
+        return true;
     }
 }

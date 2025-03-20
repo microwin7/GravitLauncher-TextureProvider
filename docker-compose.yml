@@ -3,6 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.php-fpm
+    container_name: texture-provider-php-fpm
     restart: always
     environment:
       - ROOT_FOLDER=/var/www/html
@@ -18,6 +19,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.nginx
+    container_name: texture-provider-nginx
     restart: always
     ports:
       - 29300:80
@@ -26,12 +28,12 @@ services:
       - postgres
   postgres:
     image: postgres:17
-    container_name: texture_provider_pgsql
+    container_name: texture-provider-pgsql
     restart: always
     environment:
-      POSTGRES_USER: texture_provider
-      POSTGRES_PASSWORD: texture_provider
-      POSTGRES_DB: texture_provider
+      POSTGRES_USER: texture-provider
+      POSTGRES_PASSWORD: texture-provider
+      POSTGRES_DB: texture-provider
       PGDATA: /var/lib/postgresql/data/pgdata
     volumes:
       # Монтируем данные базы данных в корень приложения

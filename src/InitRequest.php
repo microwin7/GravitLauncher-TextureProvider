@@ -26,6 +26,7 @@ use Microwin7\PHPUtils\Request\RequiredArguments;
 use Microwin7\TextureProvider\Data\UserDataFromJWT;
 use Microwin7\PHPUtils\Contracts\Component\Enum\HTTP;
 use Microwin7\PHPUtils\Exceptions\FileUploadException;
+use Microwin7\PHPUtils\Contracts\User\UserStorageTypeEnum;
 use Microwin7\PHPUtils\Contracts\Texture\Enum\MethodTypeEnum;
 use Microwin7\TextureProvider\Request\Provider\RequestParams;
 use Microwin7\PHPUtils\Contracts\Texture\Enum\ResponseTypeEnum;
@@ -205,6 +206,9 @@ class InitRequest
                         case ResponseTypeEnum::CAPE_RESIZE:
                             /** @var string $this->requestParams->login */
                             $filename = Texture::PATH($this->requestParams->responseType, $this->requestParams->login, Texture::EXTENSTION(), $size);
+                            if (in_array(Config::USER_STORAGE_TYPE(), [UserStorageTypeEnum::USERNAME, UserStorageTypeEnum::UUID, UserStorageTypeEnum::DB_USER_ID])) {
+                                if (!Cache::expireCheckValid($filename)) Cache::resetUserCachedFiles(ResponseTypeEnum::SKIN, $this->requestParams->login);
+                            }
                             if (!file_exists($filename)) {
                                 $GD = (new GDUtils(
                                     $this->requestParams->responseType,

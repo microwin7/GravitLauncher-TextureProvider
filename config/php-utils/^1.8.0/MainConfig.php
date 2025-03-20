@@ -13,13 +13,8 @@ class MainConfig
     public const array SERVERS = [];
     /** @var array<string, array<string, string|array<string, string>>> */
     public const array MODULES = [
-        'LuckPerms' => [
-            'DB_NAME' => 'LuckPerms',
-            'prefix' => 'luckperms_',
-        ],
         'TextureProvider' => [
             /** Driver Connect Database */
-            'DB_NAME' => 'texture_provider',
             'table_user' => [
                 'TABLE_NAME' => 'texture_provider_users',
                 /**
