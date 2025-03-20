@@ -20,7 +20,7 @@
     "autoload": {
         "psr-4": {
             "Microwin7\\TextureProvider\\": "src/",
-            "Microwin7\\PHPUtils\\Configs\\": "config/php-utils/^1.7.0/",
+            "Microwin7\\PHPUtils\\Configs\\": "config/php-utils/^1.8.0/",
             "Microwin7\\PHPUtils\\Exceptions\\Handler\\": "src/Exceptions/Handler/"
         },
         "files": [
