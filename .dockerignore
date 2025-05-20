@@ -5,3 +5,4 @@ cache
 db_logs
 storage
 sql
+postgres-data
