@@ -51,19 +51,10 @@
 ```bash
 sudo -s
 ```
-- Следующая команда:
-  - Обновляет зависимости
-  - Установка утилит
-  - Скачивает скрипт установки Docker
-  - Выдача прав запуска скрипта и запуск установки Docker
-  - Запуск службы
+- Установка Docker'a 
+  - Если у вас есть ошибки apt update с репозиториями - то скрипт работать не будет
 ```bash
-apt update ;
-apt install gnupg2 apt-transport-https curl -y;
-curl -fsSL https://get.docker.com -o get-docker.sh ;
-chmod +x get-docker.sh ;
-./get-docker.sh ;
-service docker start
+curl -sSL https://get.docker.com/ | CHANNEL=stable bash
 ```
 <img src="https://img.shields.io/badge/git-F05032?style=for-the-badge&logo=github&logoColor=181717&label=%D0%9A%D0%BB%D0%BE%D0%BD%D0%B8%D1%80%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5%20%D1%80%D0%B5%D0%BF%D0%BE%D0%B7%D0%B8%D1%82%D0%BE%D1%80%D0%B8%D1%8F&labelColor=white" alt="Git" height="35"/>
 
