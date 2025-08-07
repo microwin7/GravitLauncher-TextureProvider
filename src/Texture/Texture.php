@@ -236,6 +236,9 @@ class Texture implements JsonSerializable
      */
     public static function loadTexture(RequestParams|LoaderRequestParams $requestParams, UploadedFileInterface $uploadedFile, bool $hd_allow = false): Skin|Cape
     {
+        /**
+         * @var ResponseTypeEnum $requestParams->responseType
+         */
         if (!in_array($requestParams->responseType, [ResponseTypeEnum::SKIN, ResponseTypeEnum::CAPE]))
             throw new \ValueError(sprintf(
                 '%s может быть только: %s или %s',
@@ -282,19 +285,23 @@ class Texture implements JsonSerializable
             TextureUtils::validateSize($textureProperty->w, $textureProperty->h, $requestParams->responseType);
         }
         $MODULE_ARRAY_DATA = MainConfig::MODULES['TextureProvider'];
-        $table_users = $MODULE_ARRAY_DATA['table_user']['TABLE_NAME']; 
+        $table_users = $MODULE_ARRAY_DATA['table_user']['TABLE_NAME'];
         $user_username_column = $MODULE_ARRAY_DATA['table_user']['username_column'];
         $user_uuid_column = $MODULE_ARRAY_DATA['table_user']['uuid_column'];
-        $user_id = '';
-        if (in_array(Config::USER_STORAGE_TYPE(), [UserStorageTypeEnum::DB_USER_ID, UserStorageTypeEnum::DB_SHA1, UserStorageTypeEnum::DB_SHA256])) {
-            $user_id = (string)SingletonConnector::get('TextureProvider')->query(<<<SQL
-                INSERT INTO $table_users ($user_username_column, $user_uuid_column)
-                VALUES (?, ?)
-                ON CONFLICT ($user_uuid_column) DO UPDATE SET
-                $user_username_column = excluded.$user_username_column, $user_uuid_column = excluded.$user_uuid_column
-                RETURNING *;
-                SQL, "ss", $requestParams->username, $requestParams->uuid)->value();
-        }
+
+        $user_id = match (Config::USER_STORAGE_TYPE()) {
+            UserStorageTypeEnum::DB_USER_ID => (string)SingletonConnector::get('TextureProvider')->query(<<<SQL
+            SELECT id FROM $table_users WHERE $user_uuid_column IN (?)
+            SQL, "s", $requestParams->uuid)->value(),
+            UserStorageTypeEnum::DB_SHA1, UserStorageTypeEnum::DB_SHA256 => (string)SingletonConnector::get('TextureProvider')->query(<<<SQL
+            INSERT INTO $table_users ($user_username_column, $user_uuid_column)
+            VALUES (?, ?)
+            ON CONFLICT ($user_uuid_column) DO UPDATE SET
+            $user_username_column = excluded.$user_username_column, $user_uuid_column = excluded.$user_uuid_column
+            RETURNING *;
+            SQL, "ss", $requestParams->username, $requestParams->uuid)->value(),
+            default => ''
+        };
 
         /** @var string $requestParams->login */
         $requestParams->setVariable(
@@ -325,7 +332,10 @@ class Texture implements JsonSerializable
     }
     public static function generateTextureFromLoaderRequestParams(RequestParams|LoaderRequestParams $requestParams, string $data, \GdImage $gdImage): Skin|Cape
     {
-        /** @var string $requestParams->login */
+        /**
+         * @var ResponseTypeEnum::SKIN|ResponseTypeEnum::CAPE $requestParams->responseType
+         * @var string $requestParams->login
+         */
         return match ($requestParams->responseType) {
             ResponseTypeEnum::SKIN => new Skin(
                 textureStorageType: TextureStorageTypeEnum::STORAGE,

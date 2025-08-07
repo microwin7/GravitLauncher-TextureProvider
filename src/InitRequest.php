@@ -129,7 +129,7 @@ class InitRequest
         if ($this->routeInfo instanceof Matched) {
             switch ($this->routeInfo->handler) {
                 case 'provider':
-                    if (($this->requestParams = (new RequestParamsProvider)->fromRoute($this->routeInfo->variables))->responseType === ResponseTypeEnum::JSON) new BearerToken;
+                    if (($this->requestParams = (new RequestParamsProvider)->fromRoute($this->routeInfo->variables))->responseType === ResponseTypeEnum::JSON && !Config::PUBLIC_JSON_ROUTE()) new BearerToken;
                     JsonResponse::response(new TextureProvider(new User($this->requestParams)));
                     break;
                 case 'resist':

@@ -15,6 +15,8 @@ class Config
      * Используйте конфигурацию location /texture-provider/ из README
      */
     private const bool ROUTERING = true;
+
+    private const bool PUBLIC_JSON_ROUTE = false;
     /**
      * Небольшое дополнение, преобразует отдаваемые ссылки
      * Там где используется ENUM тип int, происходит переключение с имени Enum на значение
@@ -97,6 +99,10 @@ class Config
     public static function ROUTERING(): bool
     {
         return ($ENV = getenv(__FUNCTION__)) === false ? self::ROUTERING : filter_var($ENV, FILTER_VALIDATE_BOOLEAN);
+    }
+    public static function PUBLIC_JSON_ROUTE(): bool
+    {
+        return ($ENV = getenv(__FUNCTION__)) === false ? self::{__FUNCTION__} : filter_var($ENV, FILTER_VALIDATE_BOOLEAN);
     }
     public static function MINIMIZE_ENUM_REQUEST(): bool
     {

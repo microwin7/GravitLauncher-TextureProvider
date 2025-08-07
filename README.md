@@ -425,6 +425,61 @@ apt install pngcrush
 find . -type f -iname '*.png' -exec pngcrush -ow -rem allb -reduce {} \;
 ```
 
+# Инструкции по использованию API
+
+## Laravel Framework. Example: \[ Azuriom | DreamCMS ]
+- Добавление роута в `routes/api.php`
+- Файл передаётся через ключ `file`
+- Тип загружаемой текстуры передаётся через ключ `type` и должен содержать либо **`SKIN`** либо **`CAPE`**
+- Для управления загрузкой **HD** скинов и плащей, используйте ключ `hd_allow` в формате: **`false|true|1|0`**
+  - В **`.env`** выключите **HD_TEXTURES_ALLOW**
+
+### Справка:
+- Используется `Content-Type` - `multipart/form-data`
+- CMS обрабатывает пользователя, а отправлять на API нужно `username` и `uuid` уже с проверенных данных из entity User
+  - Laravel использует `interface \Illuminate\Contracts\Auth\Authenticatable`
+  - Ваша модель пользователя должна соджержать `username` и `uuid`
+  - В случае с Azuriom - `uuid` заменяется `$user->uuid` на `$user->game_id`
+
+### Пример кода:
+```php
+Route::prefix('skins')->middleware('auth')->group(function () {
+    // Маршрут для upload с перенаправлением на API TextureProvider'a
+    Route::post('upload', function () {
+        $user = Auth::user();
+        $link = env('TEXTURE_PROVIDER_URL') . '/api/upload/' . strtoupper(request()->get('type'));
+        // Перенаправляем запрос на API TextureProvider'a, передавая все данные и добавляя Bearer токен в заголовки
+        $response = Http::withToken(env('TEXTURE_PROVIDER_BEARER_TOKEN'))
+            ->attach('file', file_get_contents(request()
+                ->file('file')), 'texture.png')
+            ->asMultipart()
+            ->post(
+                $link,
+                [
+                    'username' => $user->login,
+                    'uuid' => $user->uuid
+                ]
+            );
+        // Возвращаем ответ от стороннего API
+        return Response::json($response->successful() ? array_merge(
+            $response->json(),
+            [
+                'success' => true,
+                'message' => 'Загрузка успешна'
+            ]
+        ) : [
+            'success' => false,
+            'message' => $response->json()['error']
+        ], $response->status());
+    });
+});
+```
+### Настройка файла `.env` в CMS
+```dotnet
+TEXTURE_PROVIDER_URL=http://127.0.0.1/
+TEXTURE_PROVIDER_BEARER_TOKEN=ТОКЕН (texture-provider/.env BEARER_TOKEN=ТОКЕН)
+```
+
 ##  ...БУДЕТ ДОПОЛНЕНО...
 
 - Предположительно команда для использования на PRODUCTION, будет проверяться
