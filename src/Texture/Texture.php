@@ -293,13 +293,18 @@ class Texture implements JsonSerializable
             UserStorageTypeEnum::DB_USER_ID => (string)SingletonConnector::get('TextureProvider')->query(<<<SQL
             SELECT id FROM $table_users WHERE $user_uuid_column IN (?)
             SQL, "s", $requestParams->uuid)->value(),
-            UserStorageTypeEnum::DB_SHA1, UserStorageTypeEnum::DB_SHA256 => (string)SingletonConnector::get('TextureProvider')->query(<<<SQL
-            INSERT INTO $table_users ($user_username_column, $user_uuid_column)
-            VALUES (?, ?)
-            ON CONFLICT ($user_uuid_column) DO UPDATE SET
-            $user_username_column = excluded.$user_username_column, $user_uuid_column = excluded.$user_uuid_column
-            RETURNING *;
-            SQL, "ss", $requestParams->username, $requestParams->uuid)->value(),
+            UserStorageTypeEnum::DB_SHA1, UserStorageTypeEnum::DB_SHA256 => 
+                match (Main::DB_SUD_DB()) {
+                    SubDBTypeEnum::MySQL => (string)SingletonConnector::get('TextureProvider')->query(<<<SQL
+                        SELECT id FROM $table_users WHERE $user_uuid_column IN (?)
+                        SQL, "s", $requestParams->uuid)->value(),
+                SubDBTypeEnum::PostgreSQL => (string)SingletonConnector::get('TextureProvider')->query(<<<SQL
+                        INSERT INTO $table_users ($user_username_column, $user_uuid_column)
+                        VALUES (?, ?)
+                        ON CONFLICT ($user_uuid_column) DO UPDATE SET
+                        $user_username_column = excluded.$user_username_column, $user_uuid_column = excluded.$user_uuid_column
+                        RETURNING *
+                        SQL, "ss", $requestParams->username, $requestParams->uuid)->value()},
             default => ''
         };
 
@@ -484,6 +489,7 @@ class Texture implements JsonSerializable
         }
         return !empty($json) ? $json : new stdClass;
     }
+    #[\Override]
     public function jsonSerialize(): array|stdClass
     {
         return $this->toArray();

@@ -11,6 +11,7 @@ use Microwin7\PHPUtils\Contracts\Texture\Models\Skin as ModelSkin;
 final class Skin extends ModelSkin
 {
     /** @return array{url: string, digest: string, metadata?: array{model: 'slim'}} */
+    #[\Override]
     public function jsonSerialize(): array
     {
         $json = [

@@ -11,6 +11,7 @@ use Microwin7\PHPUtils\Contracts\Texture\Models\Cape as ModelCape;
 final class Cape extends ModelCape
 {
     /** @return array{url: string, digest: string} */
+    #[\Override]
     public function jsonSerialize(): array
     {
         return [

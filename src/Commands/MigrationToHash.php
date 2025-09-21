@@ -132,7 +132,7 @@ class MigrationToHash extends Command
                     }
                     $dataHash = Texture::digest($dataSkin);
                     try {
-                        $meta_texture = (string)(int)GDUtils::checkSkinSlimFromImage($image);
+                        $meta_texture = GDUtils::checkSkinSlimFromImage($image) ? 'SLIM' : null;
                     } catch (\TypeError) {
                         $not_valid_texture++;
                         continue;
