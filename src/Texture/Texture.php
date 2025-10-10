@@ -501,14 +501,11 @@ class Texture implements JsonSerializable
             exit;
         }
         $request = Request::createFromGlobals();
-        $response = new Response();
-        $max_age = Config::IMAGE_CACHE_TIME();
-        if ($max_age === null) {
-            $max_age = match (Config::USER_STORAGE_TYPE()) {
-                UserStorageTypeEnum::DB_SHA1, UserStorageTypeEnum::DB_SHA256 => 604800,
-                default => 60
-            };
-        }
+        $response = new Response(headers: ['Access-Control-Allow-Origin' => '*']);
+        $max_age = match (Config::USER_STORAGE_TYPE()) {
+            UserStorageTypeEnum::DB_SHA1, UserStorageTypeEnum::DB_SHA256 => Config::IMAGE_CACHE_TIME * 60 * 24 * 30 , // 30 days
+            default => Config::IMAGE_CACHE_TIME()
+        };
         if ($CONTENT instanceof \GdImage) {
             $CONTENT = (function (\GdImage $canvas): string {
                 ob_start();

@@ -94,7 +94,7 @@ class Config
      * Кеширование front, back, avatar, cape_resize в секундах
      * Выставить 60, если используется хранение по username, uuid, user_id, а не хеш сумме
      */
-    private const ?int IMAGE_CACHE_TIME = 60;
+    public const int IMAGE_CACHE_TIME = 60;
 
     public static function ROUTERING(): bool
     {
@@ -192,14 +192,12 @@ class Config
                 $ENV_INT
             );
     }
-    public static function IMAGE_CACHE_TIME(): ?int
+    public static function IMAGE_CACHE_TIME(): int
     {
         return ($ENV = getenv(__FUNCTION__)) === false ?
             self::IMAGE_CACHE_TIME : (
-                strtolower($ENV) === 'null' ? null : (
-                    ($ENV_INT = filter_var($ENV, FILTER_VALIDATE_INT, ['options' => ['min_range' => 10]])) === false ?
-                    throw new \RuntimeException(sprintf('Invalid value set in environment %s: %s', __FUNCTION__, $ENV)) :
-                    $ENV_INT)
-            );
+                ($ENV_INT = filter_var($ENV, FILTER_VALIDATE_INT, ['options' => ['min_range' => 10]])) === false ?
+                throw new \RuntimeException(sprintf('Invalid value set in environment %s: %s', __FUNCTION__, $ENV)) :
+                $ENV_INT);
     }
 }
