@@ -10,6 +10,7 @@ define('NO_HD_SKIN_PERMISSION', 'У вас нет прав на установк
 define('NO_HD_CAPE_PERMISSION', 'У вас нет прав на установку HD плаща!');
 define('FILE_MOVE_FAILED', 'Произошла ошибка перемещения файла');
 define('FILE_NOT_UPLOADED', 'Файл не был загружен!');
+define('TEXTURE_RATIO_INCORRECT', 'При вычислении соотношения ширины и высоты произошла ошибка. Файл не может является текстурой!');
 
 use stdClass;
 use Carbon\Carbon;
@@ -263,7 +264,11 @@ class Texture implements JsonSerializable
         }
         GDUtils::getImageMimeType($data) === IMAGETYPE_PNG ?: throw new TextureLoaderException(PNG_FILE_SELECTION);
 
-        $textureProperty = new TextureProperty($data);
+        try {
+            $textureProperty = new TextureProperty($data);
+        } catch (\TypeError) {
+            throw new TextureLoaderException(TEXTURE_RATIO_INCORRECT);
+        }
         if ($requestParams->responseType === ResponseTypeEnum::SKIN && Config::SKIN_RESIZE() && ($textureProperty->w / 2) === $textureProperty->h)
             $textureProperty = new TextureProperty((new GDUtils(ResponseTypeEnum::SKIN_RESIZE, skinProperty: $textureProperty))->getResultData());
         try {
